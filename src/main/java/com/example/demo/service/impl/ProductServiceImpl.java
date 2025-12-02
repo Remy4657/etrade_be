@@ -11,16 +11,16 @@ import com.example.demo.service.ProductService;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-    @Autowired
-    private ProductRepository productRepository;
+    // @Autowired
+    // private ProductRepository productRepository;
 
-    @Override
-    public ProductEntity createProduct(ProductEntity product) {
-        return productRepository.createProduct(product);
-    }
+    // @Override
+    // public ProductEntity createProduct(ProductEntity product) {
+    // return productRepository.createProduct(product);
+    // }
 
-    @Override
-    public List<ProductEntity> findAllProducts() {
-        return productRepository.findAllProducts();
-    }
+    // @Override
+    // public List<ProductEntity> findAllProducts() {
+    // return productRepository.findAllProducts();
+    // }
 }

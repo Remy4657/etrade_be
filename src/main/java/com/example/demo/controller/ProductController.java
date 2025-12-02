@@ -17,31 +17,31 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RestController
 @RequestMapping("/api/v1")
 public class ProductController {
-    @Autowired
-    private ProductService productService;
-    @Autowired
-    private UserService userService;
+    // @Autowired
+    // private ProductService productService;
+    // @Autowired
+    // private UserService userService;
 
-    @PostMapping("/product/add")
-    public ProductEntity createProduct(ProductEntity productEntity) {
-        return productService.createProduct(productEntity);
-    }
+    // @PostMapping("/product/add")
+    // public ProductEntity createProduct(ProductEntity productEntity) {
+    // return productService.createProduct(productEntity);
+    // }
 
-    @GetMapping("/products")
-    public List<ProductEntity> getAllProducts() {
-        return productService.findAllProducts();
-    }
+    // @GetMapping("/products")
+    // public List<ProductEntity> getAllProducts() {
+    // return productService.findAllProducts();
+    // }
 
-    // USER
-    @GetMapping("/users")
-    public List<UserEntity> getAllUsers() {
-        return userService.getAllUsers();
-    }
+    // // USER
+    // @GetMapping("/users")
+    // public List<UserEntity> getAllUsers() {
+    // return userService.getAllUsers();
+    // }
 
-    // USER
-    @GetMapping("/get-username")
-    public List<UserEntity> getUsername(UserEntity userEntity) {
-        return userService.getUserNameEntity(userEntity);
-    }
+    // // USER
+    // @GetMapping("/get-username")
+    // public List<UserEntity> getUsername(UserEntity userEntity) {
+    // return userService.getUserNameEntity(userEntity);
+    // }
 
 }
