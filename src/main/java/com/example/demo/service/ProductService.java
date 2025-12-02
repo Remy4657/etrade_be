@@ -8,6 +8,6 @@ import com.example.demo.entity.ProductEntity;
 
 @Service
 public interface ProductService {
-    ProductEntity createProduct(ProductEntity product);
-    List<ProductEntity> findAllProducts();
-} 
+    // ProductEntity createProduct(ProductEntity product);
+    // List<ProductEntity> findAllProducts();
+}
