@@ -18,29 +18,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequestMapping("/user")
 public class UserCRUDController {
-    @Autowired
-    private UserService userService;
+    // @Autowired
+    // private UserService userService;
 
-    @PostMapping("/add")
-    public UserEntity postMethodName(@RequestBody UserEntity userEntity) {
-        return userService.createUserEntity(userEntity);
-    }
+    // @PostMapping("/add")
+    // public UserEntity postMethodName(@RequestBody UserEntity userEntity) {
+    // return userService.createUserEntity(userEntity);
+    // }
 
-    @GetMapping("/search")
-    public UserEntity searchUser(@RequestParam String name, @RequestParam String email) {
-        return userService.findByUserNameAndUserEmail(name, email);
-    }
+    // @GetMapping("/search")
+    // public UserEntity searchUser(@RequestParam String name, @RequestParam String
+    // email) {
+    // return userService.findByUserNameAndUserEmail(name, email);
+    // }
 
-    @GetMapping("/getAll")
-    public Page<UserEntity> getAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String direction) {
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sortBy = Sort.by(sortDirection, sort);
-        Pageable pageble = PageRequest.of(page, size, sortBy);
-        return userService.findAllUsers(pageble);
-    }
+    // @GetMapping("/getAll")
+    // public Page<UserEntity> getAll(
+    // @RequestParam(defaultValue = "0") int page,
+    // @RequestParam(defaultValue = "10") int size,
+    // @RequestParam(defaultValue = "id") String sort,
+    // @RequestParam(defaultValue = "asc") String direction) {
+    // Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ?
+    // Sort.Direction.ASC : Sort.Direction.DESC;
+    // Sort sortBy = Sort.by(sortDirection, sort);
+    // Pageable pageble = PageRequest.of(page, size, sortBy);
+    // return userService.findAllUsers(pageble);
+    // }
 
 }

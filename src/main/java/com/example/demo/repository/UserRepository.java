@@ -17,35 +17,37 @@ import jakarta.transaction.Transactional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
-    Page<UserEntity> findByUserName(String username, Pageable pageable);
+    // Page<UserEntity> findByUserName(String username, Pageable pageable);
 
-    UserEntity findByUserNameAndUserEmail(String userName, String userEmail);
+    // UserEntity findByUserNameAndUserEmail(String userName, String userEmail);
 
-    // where userName =
-    List<UserEntity> findByUserName(String userName);
+    // // where userName =
+    // List<UserEntity> findByUserName(String userName);
 
-    // where id < 1
-    List<UserEntity> findByIdLessThan(Long id);
+    // // where id < 1
+    // List<UserEntity> findByIdLessThan(Long id);
 
-    // RAW SQL
-    @Query("select u from UserEntity u where u.id = (select MAX(p.id) from UserEntity p)")
-    UserEntity findMaxIdUser();
+    // // RAW SQL
+    // @Query("select u from UserEntity u where u.id = (select MAX(p.id) from
+    // UserEntity p)")
+    // UserEntity findMaxIdUser();
 
-    @Query("SELECT u FROM UserEntity u WHERE u.userName = :userName AND u.userEmail = :userEmail")
-    List<UserEntity> getUserEntityByTwo(@Param("userName") String userName,
-            @Param("userEmail") String userEmail);
+    // @Query("SELECT u FROM UserEntity u WHERE u.userName = :userName AND
+    // u.userEmail = :userEmail")
+    // List<UserEntity> getUserEntityByTwo(@Param("userName") String userName,
+    // @Param("userEmail") String userEmail);
 
-    // UPDATE DELETE
-    @Modifying
-    @Query("UPDATE UserEntity u SET u.userEmail = :userName")
-    @Transactional
-    int updateUserName(@Param("userName") String userName);
+    // // UPDATE DELETE
+    // @Modifying
+    // @Query("UPDATE UserEntity u SET u.userEmail = :userName")
+    // @Transactional
+    // int updateUserName(@Param("userName") String userName);
 
-    // native query
-    /**
-     * get count user use native query
-     */
-    @Query(value = "SELECT COUNT(id) FROM java_user_001", nativeQuery = true)
-    long getTotalUser();
+    // // native query
+    // /**
+    // * get count user use native query
+    // */
+    // @Query(value = "SELECT COUNT(id) FROM java_user_001", nativeQuery = true)
+    // long getTotalUser();
 
 }
