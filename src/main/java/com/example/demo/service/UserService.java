@@ -10,16 +10,16 @@ import com.example.demo.entity.user.UserEntity;
 
 @Service
 public interface UserService {
-    UserEntity createUserEntity(UserEntity user);
+    // UserEntity createUserEntity(UserEntity user);
 
-    List<UserEntity> getAllUsers();
+    // List<UserEntity> getAllUsers();
 
-    List<UserEntity> getUserNameEntity(UserEntity user);
+    // List<UserEntity> getUserNameEntity(UserEntity user);
 
-    UserEntity findByUserNameAndUserEmail(String userName, String userEmail);
+    // UserEntity findByUserNameAndUserEmail(String userName, String userEmail);
 
-    Page<UserEntity> findAllUsers(Pageable pageable);
+    // Page<UserEntity> findAllUsers(Pageable pageable);
 
-    Page<UserEntity> findByUserName(String userName, Pageable pageable);
+    // Page<UserEntity> findByUserName(String userName, Pageable pageable);
 
 }
