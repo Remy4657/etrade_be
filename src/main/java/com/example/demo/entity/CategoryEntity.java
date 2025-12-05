@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
+import com.example.demo.entity.product.ProductEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Data
 @Entity
-@Table(name = "categories")
+@Table(name = "category")
 public class CategoryEntity {
 
     @Id
@@ -16,7 +19,11 @@ public class CategoryEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
-    // One Category → Many Products
+    @Column(nullable = false)
+    private String thumb;
+
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @JsonIgnore
     private List<ProductEntity> products;
 }
