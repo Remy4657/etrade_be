@@ -3,7 +3,7 @@ package com.example.demo.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.entity.ProductEntity;
+import com.example.demo.entity.product.ProductEntity;
 import com.example.demo.entity.user.UserEntity;
 import com.example.demo.service.ProductService;
 import com.example.demo.service.UserService;
@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RestController
 @RequestMapping("/api/v1")
 public class ProductController {
-    // @Autowired
-    // private ProductService productService;
+    @Autowired
+    private ProductService productService;
     // @Autowired
     // private UserService userService;
 
@@ -27,10 +27,10 @@ public class ProductController {
     // return productService.createProduct(productEntity);
     // }
 
-    // @GetMapping("/products")
-    // public List<ProductEntity> getAllProducts() {
-    // return productService.findAllProducts();
-    // }
+    @GetMapping("/products")
+    public List<ProductEntity> getAllProducts() {
+        return productService.findAllProducts();
+    }
 
     // // USER
     // @GetMapping("/users")
