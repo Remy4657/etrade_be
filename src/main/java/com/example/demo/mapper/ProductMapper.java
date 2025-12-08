@@ -7,10 +7,8 @@ import com.example.demo.entity.product.ProductEntity;
 import com.example.demo.entity.product.ProductImageEntity;
 import com.example.demo.entity.product.SizeEntity;
 
-import org.hibernate.engine.jdbc.Size;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +60,8 @@ public class ProductMapper {
         ProductResponse dto = new ProductResponse();
         dto.setId(p.getId());
         dto.setName(p.getName());
+        dto.setThumb(p.getThumb());
+        dto.setThumbHover(p.getThumbHover());
         dto.setDescription(p.getDescription());
         dto.setPriceOriginal(p.getPriceOriginal());
         dto.setDiscountPercent(p.getDiscountPercent());
@@ -73,9 +73,10 @@ public class ProductMapper {
         dto.setSalePrice(sale);
 
         // category
-        dto.setCategory(toCategoryResponse(p.getCategory()));
+        // dto.setCategory(toCategoryResponse(p.getCategory()));
+        dto.setPcate(p.getCategory() != null ? p.getCategory().getName() : null);
 
-        // images: order by position asc (if position null, keep at end)
+        // images
         List<ProductImageResponse> images = p.getImages() == null ? List.of()
                 : p.getImages()
                         .stream()
