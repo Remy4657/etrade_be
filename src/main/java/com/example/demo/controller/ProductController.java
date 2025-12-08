@@ -3,7 +3,7 @@ package com.example.demo.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.ProductResponse;
+import com.example.demo.dto.res.ProductResponse;
 import com.example.demo.entity.product.ProductEntity;
 import com.example.demo.entity.user.UserEntity;
 import com.example.demo.service.ProductService;

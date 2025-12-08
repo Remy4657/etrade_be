@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,5 +50,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     // */
     // @Query(value = "SELECT COUNT(id) FROM java_user_001", nativeQuery = true)
     // long getTotalUser();
+    Optional<UserEntity> findByUsername(String username);
 
+    Optional<UserEntity> findByEmail(String email);
 }

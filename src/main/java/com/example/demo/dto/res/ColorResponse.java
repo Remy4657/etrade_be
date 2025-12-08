@@ -1,7 +1,10 @@
-package com.example.demo.dto;
+package com.example.demo.dto.res;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 
 @Data
@@ -9,6 +12,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ColorResponse {
     private Long id;
+    @JsonProperty("color")
     private String colorName;
     private String colorHex;
 }

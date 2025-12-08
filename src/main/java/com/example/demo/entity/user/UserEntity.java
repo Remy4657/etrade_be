@@ -3,6 +3,7 @@ package com.example.demo.entity.user;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.demo.entity.RoleEntity;
@@ -30,5 +31,5 @@ public class UserEntity {
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), // FK của User
             inverseJoinColumns = @JoinColumn(name = "role_id") // FK của Role
     )
-    private List<RoleEntity> roleList;
+    private List<RoleEntity> roleList = new ArrayList<>();
 }

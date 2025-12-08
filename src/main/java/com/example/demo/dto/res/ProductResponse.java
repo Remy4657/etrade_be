@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.example.demo.dto.res;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,7 +28,8 @@ public class ProductResponse {
 
     // private CategoryResponse category;
     private String pcate;
-    private List<ProductImageResponse> images;
-    private List<SizeResponse> sizes;
-    private List<ColorResponse> colors;
+    // private List<ProductImageResponse> gallery;
+    private List<String> gallery;
+    private List<String> sizeAttribute;
+    private List<ColorResponse> colorAttribute;
 }

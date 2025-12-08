@@ -39,8 +39,6 @@ public class ProductEntity {
         @JoinColumn(name = "category_id", nullable = false)
         @JsonIgnore
         private CategoryEntity category;
-        // @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-        // private List<ColorEntity> colors;
 
         @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
         private List<ProductImageEntity> images;
