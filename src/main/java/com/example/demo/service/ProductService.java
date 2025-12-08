@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.ProductResponse;
+import com.example.demo.dto.res.ProductResponse;
 import com.example.demo.entity.product.ProductEntity;
 
 @Service

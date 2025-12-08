@@ -1,6 +1,11 @@
 package com.example.demo.mapper;
 
 import com.example.demo.dto.*;
+import com.example.demo.dto.res.CategoryResponse;
+import com.example.demo.dto.res.ColorResponse;
+import com.example.demo.dto.res.ProductImageResponse;
+import com.example.demo.dto.res.ProductResponse;
+import com.example.demo.dto.res.SizeResponse;
 import com.example.demo.entity.*;
 import com.example.demo.entity.product.ColorEntity;
 import com.example.demo.entity.product.ProductEntity;
@@ -77,27 +82,41 @@ public class ProductMapper {
         dto.setPcate(p.getCategory() != null ? p.getCategory().getName() : null);
 
         // images
-        List<ProductImageResponse> images = p.getImages() == null ? List.of()
-                : p.getImages()
-                        .stream()
-                        .map(this::toImageResponse)
-                        .collect(Collectors.toList());
+        // List<ProductImageResponse> images = p.getImages() == null ? List.of()
+        // : p.getImages()
+        // .stream()
+        // .map(this::toImageResponse)
+        // .collect(Collectors.toList());
+        // result:
+        // "gallery": [
+        // {
+        // "id": 1,
+        // "imageUrl": "/images/product/product-big-01.png"
+        // },
+        // {
+        // "id": 2,
+        // "imageUrl": "/images/product/product-big-02.png"
+        // }
+        // ],
+        List<String> gallery = p.getImages() == null ? List.of()
+                : p.getImages().stream()
+                        .map(img -> img.getImageUrl())
+                        .toList();
 
-        dto.setImages(images);
+        dto.setGallery(gallery);
 
         // sizes
-        List<SizeResponse> sizes = p.getSizeList() == null ? List.of()
+        List<String> sizes = p.getSizeList() == null ? List.of()
                 : p.getSizeList().stream()
-                        .map(this::toSizeResponse)
-                        .collect(Collectors.toList());
-        dto.setSizes(sizes);
+                        .map(size -> size.getSizeValue()).toList();
+        dto.setSizeAttribute(sizes);
 
         // colors
         List<ColorResponse> colors = p.getColorList() == null ? List.of()
                 : p.getColorList().stream()
                         .map(this::toColorResponse)
                         .collect(Collectors.toList());
-        dto.setColors(colors);
+        dto.setColorAttribute(colors);
 
         return dto;
     }
