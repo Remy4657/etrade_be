@@ -8,6 +8,7 @@ import com.example.demo.dto.req.RegisterRequest;
 import com.example.demo.dto.res.AuthResponse;
 import com.example.demo.entity.RoleEntity;
 import com.example.demo.entity.user.UserEntity;
+import com.example.demo.exception.CustomException;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtUtil;
@@ -26,7 +27,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse register(RegisterRequest request) {
-
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new CustomException("Email already exists");
+        }
         RoleEntity userRole = roleRepository.findByName("user");
         // .orElseThrow(() -> new RuntimeException("Role USER not found"));
 
@@ -39,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getUsername());
+
         return new AuthResponse(token);
     }
 
