@@ -11,6 +11,7 @@ import com.example.demo.dto.req.LoginRequest;
 import com.example.demo.dto.req.RegisterRequest;
 import com.example.demo.dto.res.ApiResponse;
 import com.example.demo.dto.res.AuthResponse;
+import com.example.demo.dto.res.BaseResponse;
 import com.example.demo.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,11 +31,11 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             AuthResponse res = authService.register(request);
-            return ResponseEntity.ok(res);
+            return new ResponseEntity<>(new BaseResponse<>("Successful", res, 200), HttpStatus.OK);
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse(409, e.getMessage()));
+                    .body(new BaseResponse<>(e.getMessage(), 409));
         }
     }
 
