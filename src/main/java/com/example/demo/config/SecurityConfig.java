@@ -27,11 +27,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {
                 })
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .anyRequest().authenticated())
                 // .authorizeHttpRequests(auth -> auth
-                // .anyRequest().permitAll())
+                // .requestMatchers("/api/v1/auth/**").permitAll()
+                // .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll())
                 .httpBasic(basic -> {
                 })
                 .formLogin(form -> {
