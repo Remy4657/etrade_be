@@ -1,7 +1,5 @@
 package com.example.demo.config;
 
-import java.beans.Customizer;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +28,7 @@ public class SecurityConfig {
                 // .authorizeHttpRequests(auth -> auth
                 // .requestMatchers("/api/v1/auth/**").permitAll()
                 // .anyRequest().authenticated())
+                // all apis is accesable
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll())
                 .httpBasic(basic -> {

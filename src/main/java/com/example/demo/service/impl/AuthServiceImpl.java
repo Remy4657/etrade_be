@@ -1,5 +1,7 @@
 package com.example.demo.service.impl;
 
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,23 +42,35 @@ public class AuthServiceImpl implements AuthService {
         user.getRoleList().add(userRole);
 
         userRepository.save(user);
+        List<String> roles = user.getRoleList()
+                .stream()
+                .map(RoleEntity::getName)
+                .toList();
+        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles);
 
-        String token = jwtUtil.generateToken(user.getUsername());
-
-        return new AuthResponse(token);
+        return new AuthResponse(
+                token,
+                user.getUsername(),
+                user.getEmail());
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        UserEntity user = userRepository.findByUsername(request.getUsername())
+        UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Wrong password");
         }
-
-        String token = jwtUtil.generateToken(user.getUsername());
-        return new AuthResponse(token);
+        List<String> roles = user.getRoleList()
+                .stream()
+                .map(RoleEntity::getName)
+                .toList();
+        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles);
+        return new AuthResponse(
+                token,
+                user.getUsername(),
+                user.getEmail());
     }
 }
