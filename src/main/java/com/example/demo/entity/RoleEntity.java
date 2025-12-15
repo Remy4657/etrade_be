@@ -3,6 +3,7 @@ package com.example.demo.entity;
 import java.util.List;
 
 import com.example.demo.entity.user.UserEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,5 +22,6 @@ public class RoleEntity {
 
     @ManyToMany(mappedBy = "roleList")
     @ToString.Exclude
+    @JsonIgnore
     private List<UserEntity> userList;
 }

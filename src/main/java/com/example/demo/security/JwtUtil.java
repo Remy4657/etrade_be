@@ -7,6 +7,7 @@ import java.security.Key;
 
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -31,12 +32,54 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String getUsername(String token) {
+    public String getUserId(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    // ===============================
+    // 1. Lấy username từ token
+    // ===============================
+    // public String getUsername(String token) {
+    // return getClaims(token).getSubject();
+    // }
+
+    // ===============================
+    // 2. Kiểm tra token có hợp lệ không
+    // ===============================
+    public boolean validateToken(String token) {
+        try {
+            Claims claims = getClaims(token);
+
+            // check hết hạn
+            return !isTokenExpired(claims);
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // ===============================
+    // 3. Kiểm tra token hết hạn
+    // ===============================
+    private boolean isTokenExpired(Claims claims) {
+        Date expiration = claims.getExpiration();
+        return expiration.before(new Date());
+    }
+
+    // ===============================
+    // 4. Parse claims (chung)
+    // ===============================
+    private Claims getClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(
+                        SECRET)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
