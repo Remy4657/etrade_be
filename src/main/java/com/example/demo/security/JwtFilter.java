@@ -2,6 +2,7 @@ package com.example.demo.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -24,9 +25,21 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
 
     protected boolean shouldNotFilter(HttpServletRequest request) {
-
         String path = request.getServletPath();
         return path.startsWith("/api/v1/auth/");
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        if (request.getCookies() == null)
+            return null;
+        System.out.println("access_token: " + request.getCookies());
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("access_token".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -34,6 +47,9 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
+        // String token1 = extractToken(request);
+        // System.out.println("token: " + token1);
+        System.out.println("access_token: ");
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
