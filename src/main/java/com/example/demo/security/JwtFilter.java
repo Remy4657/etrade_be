@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,7 +56,6 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
-
         // Nếu đã có authentication rồi thì bỏ qua
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
@@ -68,20 +66,24 @@ public class JwtFilter extends OncePerRequestFilter {
         System.out.println(
                 request.getMethod() + " " + request.getRequestURI() +
                         "==access_token: " + token);
-        // Không có token → cho request đi tiếp (controller sẽ bị chặn nếu cần auth)
+        // Không có token → cho request đi tiếp (controller sẽ bị chặn nếu cần auth được
+        // cấu hình ở config)
         if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
+            // Validate token (expire, signature, etc.)
+            // if (!jwtUtil.validateToken(token)) {
+            // throw new RuntimeException("Invalid token");
+            // }
             // 2. Giải mã token → lấy username
             String idStr = jwtUtil.getUserId(token);
             Long userId = Long.parseLong(idStr);
-            System.out.println("username1: " + userId);
-            // 3. Validate token (expire, signature, etc.)
+            System.out.println("userId1: " + userId);
             if (userId != null) {
-                System.out.println("username2: " + userId);
+                System.out.println("userId2: " + userId);
                 // 4. Tạo Authentication
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userId,
@@ -110,7 +112,6 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
         }
 
-        // 6. Cho request đi tiếp
         filterChain.doFilter(request, response);
     }
 }
