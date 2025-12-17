@@ -1,5 +1,6 @@
 package com.example.demo.entity.product;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.example.demo.entity.CategoryEntity;
@@ -24,7 +25,7 @@ public class ProductEntity {
         private String description;
 
         @Column(name = "price_original", nullable = false)
-        private Double priceOriginal;
+        private BigDecimal priceOriginal;
 
         @Column(name = "discount_percent")
         private Integer discountPercent;

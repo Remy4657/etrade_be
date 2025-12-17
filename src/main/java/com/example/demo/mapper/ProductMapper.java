@@ -14,6 +14,8 @@ import com.example.demo.entity.product.SizeEntity;
 
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,10 +74,20 @@ public class ProductMapper {
         dto.setDiscountPercent(p.getDiscountPercent());
 
         // compute salePrice
-        Double price = p.getPriceOriginal() == null ? 0.0 : p.getPriceOriginal();
-        Integer disc = p.getDiscountPercent() == null ? 0 : p.getDiscountPercent();
-        double sale = price - (price * disc / 100.0);
-        dto.setSalePrice(sale);
+        BigDecimal price = p.getPriceOriginal() != null
+                ? p.getPriceOriginal()
+                : BigDecimal.ZERO;
+
+        Integer disc = p.getDiscountPercent() != null
+                ? p.getDiscountPercent()
+                : 0;
+
+        BigDecimal discountRate = BigDecimal.valueOf(disc)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+        BigDecimal salePrice = price.subtract(
+                price.multiply(discountRate));
+        dto.setSalePrice(salePrice);
 
         // category
         // dto.setCategory(toCategoryResponse(p.getCategory()));
