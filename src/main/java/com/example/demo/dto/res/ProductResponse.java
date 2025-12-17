@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,9 +19,9 @@ public class ProductResponse {
     private String description;
     @JsonProperty("price")
 
-    private Double priceOriginal;
+    private BigDecimal priceOriginal;
     private Integer discountPercent;
-    private Double salePrice; // computed
+    private BigDecimal salePrice; // computed
     @JsonProperty("thumbnail")
     private String thumb; // thumbnail (position=0)
     @JsonProperty("hoverThumbnail")

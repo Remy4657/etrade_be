@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,5 +29,17 @@ public class ProductServiceImpl implements ProductService {
                 .map(productMapper::toProductResponse)
                 .toList();
 
+    }
+
+    @Override
+    public BigDecimal calculateSalePrice(ProductEntity product) {
+        if (product.getDiscountPercent() == null ||
+                product.getDiscountPercent() <= 0) {
+            return product.getPriceOriginal();
+        }
+
+        return product.getPriceOriginal()
+                .multiply(BigDecimal.valueOf(100 - product.getDiscountPercent()))
+                .divide(BigDecimal.valueOf(100));
     }
 }
