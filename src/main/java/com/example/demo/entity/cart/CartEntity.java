@@ -41,6 +41,6 @@ public class CartEntity extends BaseEntity {
     private BigDecimal cartTotalAmount = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItemEntity> items = new ArrayList<>();
+    private List<CartItemEntity> cartItemEntity = new ArrayList<>();
 
 }
