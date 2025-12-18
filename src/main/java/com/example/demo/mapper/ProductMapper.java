@@ -1,6 +1,5 @@
 package com.example.demo.mapper;
 
-import com.example.demo.dto.*;
 import com.example.demo.dto.res.CategoryResponse;
 import com.example.demo.dto.res.ColorResponse;
 import com.example.demo.dto.res.ProductImageResponse;

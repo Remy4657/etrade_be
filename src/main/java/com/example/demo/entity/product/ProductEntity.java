@@ -45,12 +45,10 @@ public class ProductEntity {
         private List<ProductImageEntity> images;
 
         @ManyToMany(fetch = FetchType.LAZY)
-        @JoinTable(name = "product_size", joinColumns = @JoinColumn(name = "product_id"), // FK của User
-                        inverseJoinColumns = @JoinColumn(name = "size_id"))
+        @JoinTable(name = "product_size", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "size_id"))
         private List<SizeEntity> sizeList;
 
         @ManyToMany(fetch = FetchType.LAZY)
-        @JoinTable(name = "product_color", joinColumns = @JoinColumn(name = "product_id"), // FK của User
-                        inverseJoinColumns = @JoinColumn(name = "color_id"))
+        @JoinTable(name = "product_color", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "color_id"))
         private List<ColorEntity> colorList;
 }
