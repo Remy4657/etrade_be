@@ -6,4 +6,6 @@ public interface CartService {
     void addToCart(Long userId, Long productId, Integer quantity, String size, String color);
 
     CartResponse getCurrentCart(Long userId);
+
+    void removeCartItem(Long userId, Long cartItemId);
 }

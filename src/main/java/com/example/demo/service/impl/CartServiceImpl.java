@@ -21,6 +21,7 @@ import com.example.demo.service.ProductService;
 
 import jakarta.transaction.Transactional;
 
+@Transactional
 @Service
 public class CartServiceImpl implements CartService {
     @Autowired
@@ -35,7 +36,7 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private ProductService productService;
 
-    @Transactional
+    @Override
     public void addToCart(
             Long userId,
             Long productId,
@@ -69,7 +70,70 @@ public class CartServiceImpl implements CartService {
             cart.getCartItemEntity().add(newItem); // sync 2 chiều
         }
         recalculateCart(cart);
+        cartRepository.save(cart);
 
+    }
+
+    @Override
+    public CartResponse getCurrentCart(Long userId) {
+        CartEntity cart = cartRepository
+                .findByUserIdAndStatus(userId, CartStatus.ACTIVE)
+                .orElse(null);
+        System.out.println("[cart]: " + cart);
+        // Nếu chưa có cart → trả cart rỗng
+        if (cart == null) {
+            return new CartResponse(
+                    List.of(),
+                    0,
+                    BigDecimal.ZERO);
+        }
+
+        // Map entity → response
+        List<CartItemResponse> items = cart.getCartItemEntity()
+                .stream()
+                .map(this::mapToItemResponse)
+                .toList();
+        return new CartResponse(
+                items,
+                cart.getCartQuantityTotal(),
+                cart.getCartTotalAmount());
+    }
+
+    @Override
+    public void removeCartItem(Long userId, Long cartItemId) {
+
+        CartEntity cart = cartRepository
+                .findByUserIdAndStatus(userId, CartStatus.ACTIVE)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        CartItemEntity item = cartItemRepository
+                .findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        // bảo mật: item phải thuộc cart của user
+        if (!item.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        // remove 2 chiều
+        cart.getCartItemEntity().remove(item);
+        cartItemRepository.delete(item);
+
+        recalculateCart(cart);
+    }
+
+    private CartItemResponse mapToItemResponse(CartItemEntity item) {
+        CartItemResponse res = new CartItemResponse();
+        res.setId(item.getId());
+        res.setProductId(item.getProduct().getId());
+        res.setTitle(item.getProduct().getName());
+        res.setThumbnail(item.getProduct().getThumb());
+        res.setPrice(item.getProduct().getPriceOriginal());
+        res.setSalePrice(item.getPrice());
+        res.setCartQuantity(item.getQuantity());
+        res.setProductSize(item.getProductSize());
+        res.setProductColor(item.getProductColor());
+        return res;
     }
 
     private CartEntity createCart(Long userId) {
@@ -100,42 +164,4 @@ public class CartServiceImpl implements CartService {
         cart.setCartTotalAmount(totalAmount);
     }
 
-    @Override
-    public CartResponse getCurrentCart(Long userId) {
-        CartEntity cart = cartRepository
-                .findByUserIdAndStatus(userId, CartStatus.ACTIVE)
-                .orElse(null);
-
-        // Nếu chưa có cart → trả cart rỗng
-        if (cart == null) {
-            return new CartResponse(
-                    List.of(),
-                    0,
-                    BigDecimal.ZERO);
-        }
-
-        // Map entity → response
-        List<CartItemResponse> items = cart.getCartItemEntity()
-                .stream()
-                .map(this::mapToItemResponse)
-                .toList();
-        return new CartResponse(
-                items,
-                cart.getCartQuantityTotal(),
-                cart.getCartTotalAmount());
-    }
-
-    private CartItemResponse mapToItemResponse(CartItemEntity item) {
-        CartItemResponse res = new CartItemResponse();
-        res.setId(item.getId());
-        res.setProductId(item.getProduct().getId());
-        res.setTitle(item.getProduct().getName());
-        res.setThumbnail(item.getProduct().getThumb());
-        res.setPrice(item.getProduct().getPriceOriginal());
-        res.setSalePrice(item.getPrice());
-        res.setCartQuantity(item.getQuantity());
-        res.setProductSize(item.getProductSize());
-        res.setProductColor(item.getProductColor());
-        return res;
-    }
 }
