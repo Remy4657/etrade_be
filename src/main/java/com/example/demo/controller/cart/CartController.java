@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.req.AddToCartRequest;
+import com.example.demo.dto.req.UpdateCartItemRequest;
 import com.example.demo.dto.res.BaseResponse;
 import com.example.demo.dto.res.CartResponse;
 import com.example.demo.service.CartService;
@@ -78,5 +80,19 @@ public class CartController {
                     .body(new BaseResponse<>(e.getMessage(), 409));
         }
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateByType(
+            @PathVariable Long id,
+            @RequestBody UpdateCartItemRequest request) {
+        cartService.updateQuantityByType(id, request.getTypeUpdate());
+        return ResponseEntity.ok("Update success");
+    }
+
+    // @DeleteMapping("/delete-item/{id}")
+    // public ResponseEntity<?> delete(@PathVariable Long id) {
+    // cartService.deleteCartItem(id);
+    // return ResponseEntity.ok("Delete success");
+    // }
 
 }

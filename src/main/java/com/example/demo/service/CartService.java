@@ -8,4 +8,8 @@ public interface CartService {
     CartResponse getCurrentCart(Long userId);
 
     void removeCartItem(Long userId, Long cartItemId);
+
+    void updateQuantityByType(Long cartItemId, String typeUpdate);
+
+    // void deleteCartItem(Long cartItemId);
 }

@@ -1,8 +1,7 @@
-package com.example.demo.entity;
+package com.example.demo.entity.user;
 
 import java.util.List;
 
-import com.example.demo.entity.user.UserEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;

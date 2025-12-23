@@ -41,8 +41,9 @@ public class CartServiceImpl implements CartService {
             Long userId,
             Long productId,
             Integer quantity,
-            String size,
-            String color) {
+            String color,
+            String size) {
+
         // tìm xem user có giỏ hàng chưa (bảng cart)
         CartEntity cart = cartRepository
                 .findByUserIdAndStatus(userId, CartStatus.ACTIVE)
@@ -57,6 +58,7 @@ public class CartServiceImpl implements CartService {
                 .orElse(null);
 
         if (item != null) {
+            // nếu sp được add vào cart trước đó rồi
             item.setQuantity(item.getQuantity() + quantity);
         } else {
             CartItemEntity newItem = new CartItemEntity();
@@ -71,7 +73,6 @@ public class CartServiceImpl implements CartService {
         }
         recalculateCart(cart);
         cartRepository.save(cart);
-
     }
 
     @Override
@@ -79,7 +80,6 @@ public class CartServiceImpl implements CartService {
         CartEntity cart = cartRepository
                 .findByUserIdAndStatus(userId, CartStatus.ACTIVE)
                 .orElse(null);
-        System.out.println("[cart]: " + cart);
         // Nếu chưa có cart → trả cart rỗng
         if (cart == null) {
             return new CartResponse(
@@ -117,10 +117,55 @@ public class CartServiceImpl implements CartService {
 
         // remove 2 chiều
         cart.getCartItemEntity().remove(item);
-        cartItemRepository.delete(item);
+        item.setCart(null);
 
         recalculateCart(cart);
     }
+
+    // start: increase or decrease item in cart
+    public void updateQuantityByType(Long cartItemId, String typeUpdate) {
+
+        CartItemEntity item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        CartEntity cart = item.getCart();
+
+        if ("increase".equalsIgnoreCase(typeUpdate)) {
+            item.setQuantity(item.getQuantity() + 1);
+            // item.setTotalAmount(
+            // item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+        } else if ("decrease".equalsIgnoreCase(typeUpdate)) {
+
+            int newQty = item.getQuantity() - 1;
+
+            if (newQty <= 0) {
+                cartItemRepository.delete(item);
+            } else {
+                item.setQuantity(newQty);
+                // item.setTotalAmount(
+                // item.getPrice().multiply(BigDecimal.valueOf(newQty)));
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid type: " + typeUpdate);
+        }
+
+        recalculateCart(cart);
+    }
+    // end: increase or decrease item in cart
+
+    // start: delete item in cart
+    // public void deleteCartItem(Long cartItemId) {
+
+    // CartItemEntity item = cartItemRepository.findById(cartItemId)
+    // .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+    // CartEntity cart = item.getCart();
+
+    // cartItemRepository.delete(item);
+
+    // recalculateCart(cart);
+    // }
+    // end: delete item in cart
 
     private CartItemResponse mapToItemResponse(CartItemEntity item) {
         CartItemResponse res = new CartItemResponse();

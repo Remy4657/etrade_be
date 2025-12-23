@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.req.LoginRequest;
 import com.example.demo.dto.req.RegisterRequest;
 import com.example.demo.dto.res.AuthResponse;
-import com.example.demo.entity.RoleEntity;
+import com.example.demo.entity.user.RoleEntity;
 import com.example.demo.entity.user.UserEntity;
 import com.example.demo.exception.CustomException;
 import com.example.demo.repository.RoleRepository;

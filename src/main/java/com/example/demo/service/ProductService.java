@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.res.ProductDetailResponse;
 import com.example.demo.dto.res.ProductResponse;
 import com.example.demo.entity.product.ProductEntity;
 
@@ -14,4 +15,6 @@ public interface ProductService {
     List<ProductResponse> findAllProducts();
 
     BigDecimal calculateSalePrice(ProductEntity product);
+
+    ProductDetailResponse getProductDetail(Long id);
 }
