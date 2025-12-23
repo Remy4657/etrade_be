@@ -12,7 +12,9 @@ import com.example.demo.service.UserService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
@@ -31,6 +33,11 @@ public class ProductController {
     @GetMapping("/products")
     public List<ProductResponse> getAllProducts() {
         return productService.findAllProducts();
+    }
+
+    @GetMapping("/product/{id}")
+    public ResponseEntity<?> getProductDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductDetail(id));
     }
 
     // // USER

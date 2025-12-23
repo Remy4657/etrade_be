@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.mapper.ProductMapper;
+import com.example.demo.dto.res.ProductDetailResponse;
 import com.example.demo.dto.res.ProductResponse;
 import com.example.demo.entity.product.ProductEntity;
 import com.example.demo.repository.ProductRepository;
@@ -40,5 +41,14 @@ public class ProductServiceImpl implements ProductService {
         return product.getPriceOriginal()
                 .multiply(BigDecimal.valueOf(100 - product.getDiscountPercent()))
                 .divide(BigDecimal.valueOf(100));
+    }
+
+    @Override
+    public ProductDetailResponse getProductDetail(Long id) {
+
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        return productMapper.toProductDetailResponse(product);
     }
 }

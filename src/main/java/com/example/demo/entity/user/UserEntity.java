@@ -5,8 +5,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.example.demo.entity.RoleEntity;
+import com.example.demo.entity.user.RoleEntity;
 
 @Data
 @Entity

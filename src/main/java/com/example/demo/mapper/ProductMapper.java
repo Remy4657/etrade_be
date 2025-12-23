@@ -2,6 +2,7 @@ package com.example.demo.mapper;
 
 import com.example.demo.dto.res.CategoryResponse;
 import com.example.demo.dto.res.ColorResponse;
+import com.example.demo.dto.res.ProductDetailResponse;
 import com.example.demo.dto.res.ProductImageResponse;
 import com.example.demo.dto.res.ProductResponse;
 import com.example.demo.dto.res.SizeResponse;
@@ -92,23 +93,6 @@ public class ProductMapper {
         // dto.setCategory(toCategoryResponse(p.getCategory()));
         dto.setPcate(p.getCategory() != null ? p.getCategory().getName() : null);
 
-        // images
-        // List<ProductImageResponse> images = p.getImages() == null ? List.of()
-        // : p.getImages()
-        // .stream()
-        // .map(this::toImageResponse)
-        // .collect(Collectors.toList());
-        // result:
-        // "gallery": [
-        // {
-        // "id": 1,
-        // "imageUrl": "/images/product/product-big-01.png"
-        // },
-        // {
-        // "id": 2,
-        // "imageUrl": "/images/product/product-big-02.png"
-        // }
-        // ],
         List<String> gallery = p.getImages() == null ? List.of()
                 : p.getImages().stream()
                         .map(img -> img.getImageUrl())
@@ -125,6 +109,56 @@ public class ProductMapper {
         // colors
         List<ColorResponse> colors = p.getColorList() == null ? List.of()
                 : p.getColorList().stream()
+                        .map(this::toColorResponse)
+                        .collect(Collectors.toList());
+        dto.setColorAttribute(colors);
+
+        return dto;
+    }
+
+    public ProductDetailResponse toProductDetailResponse(ProductEntity product) {
+
+        ProductDetailResponse dto = new ProductDetailResponse();
+
+        dto.setId(product.getId());
+        dto.setTitle(product.getName());
+        dto.setDescription(product.getDescription());
+
+        dto.setPrice(product.getPriceOriginal());
+        dto.setDiscountPercent(product.getDiscountPercent());
+
+        // tính salePrice
+        if (product.getDiscountPercent() != null) {
+            dto.setSalePrice(
+                    product.getPriceOriginal()
+                            .subtract(
+                                    product.getPriceOriginal()
+                                            .multiply(BigDecimal.valueOf(product.getDiscountPercent()))
+                                            .divide(BigDecimal.valueOf(100))));
+        } else {
+            dto.setSalePrice(product.getPriceOriginal());
+        }
+
+        dto.setPcate(product.getCategory().getName());
+        dto.setThumbnail(product.getThumb());
+        dto.setHoverThumbnail(product.getThumbHover());
+
+        List<String> gallery = product.getImages() == null ? List.of()
+                : product.getImages().stream()
+                        .map(img -> img.getImageUrl())
+                        .toList();
+
+        dto.setGallery(gallery);
+
+        // sizes
+        List<String> sizes = product.getSizeList() == null ? List.of()
+                : product.getSizeList().stream()
+                        .map(size -> size.getSizeValue()).toList();
+        dto.setSizeAttribute(sizes);
+
+        // colors
+        List<ColorResponse> colors = product.getColorList() == null ? List.of()
+                : product.getColorList().stream()
                         .map(this::toColorResponse)
                         .collect(Collectors.toList());
         dto.setColorAttribute(colors);
