@@ -72,14 +72,6 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    // public Map<String, Object> me() {
-    // Map<String, Object> res = new HashMap<>();
-    // res.put("id", 1);
-    // res.put("username", "test_user");
-    // res.put("email", "test@gmail.com");
-    // res.put("role", "USER");
-    // return res;
-    // }
     public UserEntity me(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         return userRepository.findById(userId)
