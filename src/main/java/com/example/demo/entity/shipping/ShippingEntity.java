@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.demo.entity.shipping;
 
 import com.example.demo.entity.order.OrderEntity;
 
@@ -13,14 +13,15 @@ public class ShippingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne
-    @JoinColumn(name = "order_id")
-    private OrderEntity order;
-
     private String receiverName;
     private String phone;
+    private String email;
     private String address;
+    private String city;
+    private String notes;
 
     private String shippingStatus;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipping_method_id", nullable = false)
+    private ShippingMethodEntity shippingMethod;
 }
