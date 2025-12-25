@@ -8,7 +8,7 @@ import lombok.Data;
 public class CheckoutRequest {
 
     private Long userId;
-    private Long shippingId;
+    private ShippingRequest shipping;
     private Long paymentId;
 
     private List<CheckoutItem> items;

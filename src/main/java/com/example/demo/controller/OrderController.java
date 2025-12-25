@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.req.CheckoutRequest;
 import com.example.demo.entity.order.OrderEntity;
 import com.example.demo.service.OrderService;
-import com.example.demo.service.ProductService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -18,7 +17,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/checkout")
+    @PostMapping("/orders/checkout")
     public ResponseEntity<?> checkout(@RequestBody CheckoutRequest request) {
 
         OrderEntity order = orderService.processCheckout(request);
