@@ -1,6 +1,10 @@
 package com.example.demo.service;
 
+import org.springframework.stereotype.Service;
+
 import com.example.demo.dto.res.CartResponse;
+
+@Service
 
 public interface CartService {
     void addToCart(Long userId, Long productId, Integer quantity, String size, String color);

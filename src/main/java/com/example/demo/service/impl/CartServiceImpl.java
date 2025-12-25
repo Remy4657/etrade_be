@@ -13,6 +13,7 @@ import com.example.demo.entity.cart.CartItemEntity;
 import com.example.demo.entity.product.ProductEntity;
 import com.example.demo.entity.user.UserEntity;
 import com.example.demo.enumtype.CartStatus;
+import com.example.demo.mapper.CartItemMapper;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.ProductRepository;
@@ -20,10 +21,16 @@ import com.example.demo.service.CartService;
 import com.example.demo.service.ProductService;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Transactional
 @Service
+@RequiredArgsConstructor // dùng khời tạo constructor cho thuộc tính final (@Autowired không áp dụng dc
+                         // trong case này)
+
 public class CartServiceImpl implements CartService {
+
+    private final CartItemMapper cartItemMapper;
     @Autowired
     private CartRepository cartRepository;
     @Autowired
@@ -91,7 +98,7 @@ public class CartServiceImpl implements CartService {
         // Map entity → response
         List<CartItemResponse> items = cart.getCartItemEntity()
                 .stream()
-                .map(this::mapToItemResponse)
+                .map(cartItemMapper::toCartItemResponse)
                 .toList();
         return new CartResponse(
                 items,
@@ -135,9 +142,7 @@ public class CartServiceImpl implements CartService {
             // item.setTotalAmount(
             // item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
         } else if ("decrease".equalsIgnoreCase(typeUpdate)) {
-
             int newQty = item.getQuantity() - 1;
-
             if (newQty <= 0) {
                 cartItemRepository.delete(item);
             } else {
@@ -166,21 +171,6 @@ public class CartServiceImpl implements CartService {
     // recalculateCart(cart);
     // }
     // end: delete item in cart
-
-    private CartItemResponse mapToItemResponse(CartItemEntity item) {
-        CartItemResponse res = new CartItemResponse();
-        res.setId(item.getId());
-        res.setProductId(item.getProduct().getId());
-        res.setTitle(item.getProduct().getName());
-        res.setThumbnail(item.getProduct().getThumb());
-        res.setPrice(item.getProduct().getPriceOriginal());
-        res.setSalePrice(item.getPrice());
-        res.setCartQuantity(item.getQuantity());
-        res.setProductSize(item.getProductSize());
-        res.setProductColor(item.getProductColor());
-        return res;
-    }
-
     private CartEntity createCart(Long userId) {
         CartEntity cart = new CartEntity();
         UserEntity user = new UserEntity();

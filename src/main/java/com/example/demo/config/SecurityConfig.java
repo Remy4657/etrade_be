@@ -1,7 +1,5 @@
 package com.example.demo.config;
 
-import java.beans.Customizer;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/products/**",
                                 "/api/v1/categories/**",
                                 "/api/v1/cart/**",
+                                "/api/v1/orders/**",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register")
                         .permitAll()
