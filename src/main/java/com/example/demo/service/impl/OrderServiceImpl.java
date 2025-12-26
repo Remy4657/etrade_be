@@ -103,4 +103,28 @@ public class OrderServiceImpl implements OrderService {
 
                 return orderRepository.save(order); // cascade lưu OrderItem
         }
+
+        public OrderEntity updateTotalAmount(
+                        Long orderId,
+                        Long shippingId) {
+
+                // 1. Lấy order
+                OrderEntity order = orderRepository.findById(orderId)
+                                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+                // 2. Lấy shipping theo ID
+                ShippingMethodEntity shipping = shippingMethodRepository.findById(shippingId)
+                                .orElseThrow(() -> new RuntimeException("Shipping not found"));
+
+                // 3. Set shipping
+                // order.setShippingMethod(shipping);
+                // order.setShippingFee(shipping.getFee());
+
+                // 4. Tính lại totalAmount
+                // Double totalAmount = order.getSubTotal() + shipping.getFee();
+                // order.setTotalAmount(totalAmount);
+
+                // 5. Save
+                return orderRepository.save(order);
+        }
 }
