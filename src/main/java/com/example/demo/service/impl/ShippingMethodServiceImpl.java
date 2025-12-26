@@ -19,9 +19,11 @@ public class ShippingMethodServiceImpl implements ShippingMethodService {
         return shippingMethodRepository.findAll()
                 .stream()
                 .map(method -> new ShippingMethodResponse(
+                        method.getId(),
                         method.getName(),
                         method.getFee(),
-                        method.getEstimatedDays()))
+                        method.getEstimatedDays(),
+                        method.getCode()))
                 .toList();
     }
 }

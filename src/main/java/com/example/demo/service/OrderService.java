@@ -9,4 +9,8 @@ import com.example.demo.entity.order.OrderEntity;
 
 public interface OrderService {
     OrderEntity processCheckout(CheckoutRequest request);
+
+    OrderEntity updateTotalAmount(
+            Long orderId,
+            Long shippingId);
 }
