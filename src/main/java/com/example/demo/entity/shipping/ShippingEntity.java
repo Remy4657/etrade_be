@@ -1,5 +1,7 @@
 package com.example.demo.entity.shipping;
 
+import java.math.BigDecimal;
+
 import com.example.demo.entity.order.OrderEntity;
 
 import jakarta.persistence.*;
@@ -21,6 +23,8 @@ public class ShippingEntity {
     private String notes;
 
     private String shippingStatus;
+    private BigDecimal shippingFee;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipping_method_id", nullable = false)
     private ShippingMethodEntity shippingMethod;

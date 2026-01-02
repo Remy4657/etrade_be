@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 @Service
 @RequiredArgsConstructor // dùng khời tạo constructor cho thuộc tính final (@Autowired không áp dụng dc
-                         // trong case này)
+                         // trong case final này)
 
 public class CartServiceImpl implements CartService {
 
