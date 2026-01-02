@@ -28,11 +28,11 @@ public class OrderEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", unique = false)
     private UserEntity user;
 
     private Integer totalQuantity;
-
+    private BigDecimal subtotalAmount; // tiền hàng
     @Column(precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
@@ -43,10 +43,10 @@ public class OrderEntity {
     private List<OrderItemEntity> orderItemEntity = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "shipping_id", nullable = false)
+    @JoinColumn(name = "shipping_id", nullable = false, unique = false)
     private ShippingEntity shipping;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id", nullable = false)
+    @JoinColumn(name = "payment_id", nullable = false, unique = false)
     private PaymentEntity payment;
 }

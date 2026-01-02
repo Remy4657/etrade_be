@@ -1,11 +1,13 @@
 package com.example.demo.service.impl;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.req.CheckoutRequest;
+import com.example.demo.dto.res.OrderResponse;
 import com.example.demo.entity.order.OrderEntity;
 import com.example.demo.entity.order.OrderItemEntity;
 import com.example.demo.entity.payment.PaymentEntity;
@@ -13,6 +15,7 @@ import com.example.demo.entity.product.ProductEntity;
 import com.example.demo.entity.shipping.ShippingEntity;
 import com.example.demo.entity.shipping.ShippingMethodEntity;
 import com.example.demo.entity.user.UserEntity;
+import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.PaymentRepository;
 import com.example.demo.repository.ShippingRepository;
@@ -24,9 +27,12 @@ import com.example.demo.service.OrderService;
 import com.example.demo.service.ProductService;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Transactional
 @Service
+@RequiredArgsConstructor // dùng khời tạo constructor cho thuộc tính final (@Autowired không áp dụng dc
+                         // trong case final này)
 public class OrderServiceImpl implements OrderService {
 
         @Autowired
@@ -41,6 +47,7 @@ public class OrderServiceImpl implements OrderService {
         private ShippingMethodRepository shippingMethodRepository;
         @Autowired
         private ProductService productService;
+        private final OrderMapper orderMapper;
 
         @Override
         public OrderEntity processCheckout(CheckoutRequest request) {
@@ -57,13 +64,11 @@ public class OrderServiceImpl implements OrderService {
                 shipping.setNotes(request.getShipping().getNotes());
                 shipping.setShippingStatus("PENDING");
                 shipping.setShippingMethod(shippingMethod);
+                // snapshot fee
+                shipping.setShippingFee(shippingMethod.getFee());
 
                 UserEntity user = userRepository.findById(request.getUserId())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-                // ShippingEntity shipping =
-                // shippingRepository.findById(request.getShippingId())
-                // .orElseThrow(() -> new RuntimeException("Shipping not found"));
 
                 PaymentEntity payment = paymentRepository.findById(request.getPaymentId())
                                 .orElseThrow(() -> new RuntimeException("Payment not found"));
@@ -73,8 +78,8 @@ public class OrderServiceImpl implements OrderService {
                 order.setShipping(shipping);
                 order.setPayment(payment);
                 order.setStatus("PENDING");
-
-                BigDecimal totalAmount = BigDecimal.ZERO;
+                BigDecimal subtotal = BigDecimal.ZERO;
+                BigDecimal shippingFee = shippingMethod.getFee();
                 int totalQuantity = 0;
 
                 for (CheckoutRequest.CheckoutItem item : request.getItems()) {
@@ -91,40 +96,26 @@ public class OrderServiceImpl implements OrderService {
                         orderItem.setProductColor(item.getProductColor());
 
                         totalQuantity += item.getQuantity();
-                        totalAmount = totalAmount.add(
+                        subtotal = subtotal.add(
                                         productService.calculateSalePrice(product)
                                                         .multiply(BigDecimal.valueOf(item.getQuantity())));
 
                         order.getOrderItemEntity().add(orderItem);
                 }
-
                 order.setTotalQuantity(totalQuantity);
-                order.setTotalAmount(totalAmount);
+                order.setSubtotalAmount(subtotal);
+                shippingFee = shipping.getShippingFee();
+                order.setTotalAmount(subtotal.add(shippingFee));
 
                 return orderRepository.save(order); // cascade lưu OrderItem
         }
 
-        public OrderEntity updateTotalAmount(
-                        Long orderId,
-                        Long shippingId) {
-
-                // 1. Lấy order
-                OrderEntity order = orderRepository.findById(orderId)
-                                .orElseThrow(() -> new RuntimeException("Order not found"));
-
-                // 2. Lấy shipping theo ID
-                ShippingMethodEntity shipping = shippingMethodRepository.findById(shippingId)
-                                .orElseThrow(() -> new RuntimeException("Shipping not found"));
-
-                // 3. Set shipping
-                // order.setShippingMethod(shipping);
-                // order.setShippingFee(shipping.getFee());
-
-                // 4. Tính lại totalAmount
-                // Double totalAmount = order.getSubTotal() + shipping.getFee();
-                // order.setTotalAmount(totalAmount);
-
-                // 5. Save
-                return orderRepository.save(order);
+        @Override
+        public List<OrderResponse> getAllOrders() {
+                return orderRepository.findAll()
+                                .stream()
+                                .map(orderMapper::mapToResponse)
+                                .toList();
         }
+
 }
