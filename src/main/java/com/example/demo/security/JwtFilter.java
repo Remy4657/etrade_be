@@ -28,11 +28,13 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final List<String> EXCLUDE_URLS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
+            // "/api/v1/orders/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/uploads/**");
 
     @Override
+    // doFilterInternal() KHÔNG được gọi
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return EXCLUDE_URLS.stream()

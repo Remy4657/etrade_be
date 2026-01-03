@@ -25,12 +25,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "cart_item", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "cart_id",
-        "product_id",
-        "product_size",
-        "product_color"
-}))
+@Table(name = "cart_item", uniqueConstraints = @UniqueConstraint(
+        // đảm bảo các thuộc tính phía dưới của bản ghi không được trùng nhau
+        columnNames = {
+                "cart_id",
+                "product_id",
+                "product_size",
+                "product_color"
+        }))
 public class CartItemEntity extends BaseEntity {
 
     @Id
