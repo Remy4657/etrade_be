@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.demo.entity.BaseEntity;
 import com.example.demo.entity.payment.PaymentEntity;
 import com.example.demo.entity.shipping.ShippingEntity;
 import com.example.demo.entity.user.UserEntity;
@@ -21,7 +22,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "orders")
-public class OrderEntity {
+public class OrderEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

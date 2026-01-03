@@ -20,12 +20,16 @@ public class OrderMapper {
         res.setSubtotalAmount(order.getSubtotalAmount());
         res.setTotalAmount(order.getTotalAmount());
         res.setStatus(order.getStatus());
+        res.setCreatedAt(order.getCreatedAt());
+        res.setUpdatedAt(order.getUpdatedAt());
 
         // Shipping
         ShippingEntity shipping = order.getShipping();
         res.setReceiverName(shipping.getReceiverName());
         res.setPhone(shipping.getPhone());
         res.setAddress(shipping.getAddress());
+        res.setCity(shipping.getCity());
+        res.setNotes(shipping.getNotes());
 
         // Payment
         PaymentEntity payment = order.getPayment();

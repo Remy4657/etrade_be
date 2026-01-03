@@ -1,10 +1,11 @@
 package com.example.demo.dto.res;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class PaymentResponse {
     private Long id;
     private String code;
