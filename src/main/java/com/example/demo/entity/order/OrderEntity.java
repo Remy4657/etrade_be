@@ -37,8 +37,9 @@ public class OrderEntity extends BaseEntity {
     @Column(precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
-    private String status;
     // PENDING, PAID, SHIPPING, COMPLETED, CANCELLED
+    private String status;
+    private String notes;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> orderItemEntity = new ArrayList<>();
