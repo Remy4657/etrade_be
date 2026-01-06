@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.springframework.stereotype.Component;
 
@@ -20,7 +22,7 @@ public class JwtUtil {
     public String generateToken(String username, Long userId, String email, List<String> roles) {
         return Jwts.builder()
                 // định danh chính
-                .setSubject(String.valueOf(userId)) // 👈 userId
+                .setSubject(String.valueOf(userId)) // userId
                 // custom claims
                 .claim("username", username)
                 .claim("email", email)
@@ -81,5 +83,30 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    // Lấy expiration
+    public LocalDateTime getExpiration(String token) {
+        Date exp = extractAllClaims(token).getExpiration();
+        return exp.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    // Parse claims
+    // extractAllClaims: Parse+validate+ trả payload
+    // extractUserId: Lấy 1 field từ claims
+    // getExpiration: Lấy exp
+
+    public Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    private Key getSignKey() {
+        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 }

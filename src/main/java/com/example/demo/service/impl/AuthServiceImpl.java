@@ -9,13 +9,19 @@ import com.example.demo.dto.req.LoginRequest;
 import com.example.demo.dto.req.RegisterRequest;
 import com.example.demo.dto.res.AuthResponse;
 import com.example.demo.entity.user.RoleEntity;
+import com.example.demo.entity.user.TokenBlacklistEntity;
 import com.example.demo.entity.user.UserEntity;
 import com.example.demo.exception.CustomException;
 import com.example.demo.repository.RoleRepository;
+import com.example.demo.repository.TokenBlacklistRepository;
 import com.example.demo.repository.UserRepository;
+
 import com.example.demo.security.JwtUtil;
 import com.example.demo.service.AuthService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistRepository blacklistRepo;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -72,5 +79,45 @@ public class AuthServiceImpl implements AuthService {
                 token,
                 user.getUsername(),
                 user.getEmail());
+    }
+
+    @Override
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+
+        // 1. Lấy token từ cookie
+        String token = extractTokenFromCookie(request);
+
+        // 2. Revoke token (nếu tồn tại)
+        if (token != null && !blacklistRepo.existsByToken(token)) {
+            TokenBlacklistEntity blacklist = new TokenBlacklistEntity();
+            blacklist.setToken(token);
+            blacklist.setExpiredAt(jwtUtil.getExpiration(token));
+            blacklistRepo.save(blacklist);
+        }
+
+        // 3. Xóa cookie access_token
+        clearCookie(response, "access_token");
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null)
+            return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("access_token".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private void clearCookie(HttpServletResponse response, String name) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // nếu dùng https
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // xóa cookie
+
+        response.addCookie(cookie);
     }
 }

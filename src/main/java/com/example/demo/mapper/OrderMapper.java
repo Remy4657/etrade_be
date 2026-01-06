@@ -11,7 +11,6 @@ import com.example.demo.entity.payment.PaymentEntity;
 import com.example.demo.entity.shipping.ShippingEntity;
 
 @Component
-
 public class OrderMapper {
     public OrderResponse mapToResponse(OrderEntity order) {
         OrderResponse res = new OrderResponse();

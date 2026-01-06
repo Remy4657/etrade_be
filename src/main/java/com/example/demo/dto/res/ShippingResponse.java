@@ -13,6 +13,7 @@ public class ShippingResponse {
     private String phone;
     private String email;
     private String address;
+    private String city;
     private BigDecimal fee;
     private String shippingMethod;
 }

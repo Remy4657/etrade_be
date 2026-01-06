@@ -1,8 +1,5 @@
 package com.example.demo.controller.user;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,6 +20,7 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.service.AuthService;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -35,10 +33,6 @@ public class AuthController {
     private final UserRepository userRepository;
 
     @PostMapping("/register")
-    // public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest
-    // request) {
-    // return ResponseEntity.ok(authService.register(request));
-    // }
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             AuthResponse res = authService.register(request);
@@ -52,7 +46,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
-        // return ResponseEntity.ok(authService.login(request));
         try {
             AuthResponse res = authService.login(request);
             System.out.println("[controller] res login: " + res);
@@ -76,6 +69,14 @@ public class AuthController {
         Long userId = Long.parseLong(authentication.getName());
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        authService.logout(request, response);
+        return ResponseEntity.ok("Logout success");
     }
 
 }

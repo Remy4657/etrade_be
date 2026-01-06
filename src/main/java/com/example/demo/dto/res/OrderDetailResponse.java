@@ -1,6 +1,7 @@
 package com.example.demo.dto.res;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.Getter;
@@ -14,7 +15,9 @@ public class OrderDetailResponse {
     private BigDecimal subtotalAmount;
     private BigDecimal totalAmount;
     private String status;
-
+    private String notes;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private ShippingResponse shipping;
     private PaymentResponse payment;
     private List<OrderItemResponse> items;
