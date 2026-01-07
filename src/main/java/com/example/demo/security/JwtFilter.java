@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,27 +15,33 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.demo.repository.TokenBlacklistRepository;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
-
+    private final TokenBlacklistRepository tokenBlacklistRepository;
     private static final AntPathMatcher matcher = new AntPathMatcher();
 
     private static final List<String> EXCLUDE_URLS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
-            "/api/v1/orders/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/uploads/**");
 
     @Override
-    // doFilterInternal() KHÔNG được gọi
+    // cac url trong shouldNotFilter thi doFilterInternal() KHÔNG được gọi
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return EXCLUDE_URLS.stream()
@@ -58,12 +65,12 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
-        // Nếu đã có authentication rồi thì bỏ qua
+        // 1. Nếu đã có authentication rồi thì bỏ qua
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
             return;
         }
-        // 1. Lấy token từ COOKIE
+        // 2. Lấy token từ COOKIE
         String token = extractToken(request);
         System.out.println(
                 request.getMethod() + " " + request.getRequestURI() +
@@ -76,17 +83,22 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
-            // Validate token (expire, signature, etc.)
-            // if (!jwtUtil.validateToken(token)) {
-            // throw new RuntimeException("Invalid token");
-            // }
-            // 2. Giải mã token → lấy username
-            String idStr = jwtUtil.getUserId(token);
-            Long userId = Long.parseLong(idStr);
+            // 2.5 CHECK TOKEN CÓ BỊ REVOKE KHÔNG
+            if (tokenBlacklistRepository.existsByToken(token)) {
+                throw new RuntimeException("Token revoked");
+            }
+            // 3. Validate token (expire, signature, etc.)
+            if (!jwtUtil.validateToken(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            // 4. Giải mã token → lấy userId
+            Long userId = Long.parseLong(jwtUtil.getUserId(token));
             System.out.println("userId1: " + userId);
+
             if (userId != null) {
                 System.out.println("userId2: " + userId);
-                // 4. Tạo Authentication
+                // 5. Tạo Authentication
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userId,
                         null,
@@ -97,16 +109,10 @@ public class JwtFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource()
                                 .buildDetails(request));
 
-                // 5. Set vào SecurityContext
+                // 6. Set vào SecurityContext
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
             }
-            // else {
-            // // Token hết hạn hoặc invalid
-            // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired or
-            // invalid");
-            // return; // dừng filter chain
-            // }
 
         } catch (Exception e) {
             // Token sai / hết hạn → không set auth
