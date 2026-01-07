@@ -16,7 +16,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    private final String SECRET = "SECRET_123456789123456789_SECRET_123456789123456789"; // nên dài >= 256 bit
+    private final String SECRET = "SECRET123456789123456789SECRET123456789123456789"; // nên dài >= 256 bit
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
     public String generateToken(String username, Long userId, String email, List<String> roles) {
@@ -50,12 +50,11 @@ public class JwtUtil {
     // return getClaims(token).getSubject();
     // }
 
-    // ===============================
     // 2. Kiểm tra token có hợp lệ không
-    // ===============================
     public boolean validateToken(String token) {
         try {
             Claims claims = getClaims(token);
+            System.out.println("claims " + claims);
 
             // check hết hạn
             return !isTokenExpired(claims);
@@ -65,21 +64,20 @@ public class JwtUtil {
         }
     }
 
-    // ===============================
     // 3. Kiểm tra token hết hạn
-    // ===============================
     private boolean isTokenExpired(Claims claims) {
         Date expiration = claims.getExpiration();
+        System.out.println("expiration " + expiration);
+        System.out.println("new date " + new Date());
+
         return expiration.before(new Date());
     }
 
-    // ===============================
     // 4. Parse claims (chung)
-    // ===============================
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(
-                        SECRET)
+                        getSignKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
