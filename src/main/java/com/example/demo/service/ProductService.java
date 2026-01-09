@@ -17,4 +17,10 @@ public interface ProductService {
     BigDecimal calculateSalePrice(ProductEntity product);
 
     ProductDetailResponse getProductDetail(Long id);
+
+    List<ProductResponse> getProductsByCategoryName(String categoryName);
+
+    List<ProductResponse> getNewestProducts();
+
+    List<ProductResponse> getBestSellerProducts();
 }

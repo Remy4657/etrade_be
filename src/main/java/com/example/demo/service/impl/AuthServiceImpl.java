@@ -1,7 +1,10 @@
 package com.example.demo.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,7 @@ import com.example.demo.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final TokenBlacklistRepository blacklistRepo;
+    private final TokenBlacklistRepository tokenBlacklistRepository;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -88,11 +92,11 @@ public class AuthServiceImpl implements AuthService {
         String token = extractTokenFromCookie(request);
 
         // 2. Revoke token (nếu tồn tại)
-        if (token != null && !blacklistRepo.existsByToken(token)) {
+        if (token != null && !tokenBlacklistRepository.existsByToken(token)) {
             TokenBlacklistEntity blacklist = new TokenBlacklistEntity();
             blacklist.setToken(token);
             blacklist.setExpiredAt(jwtUtil.getExpiration(token));
-            blacklistRepo.save(blacklist);
+            tokenBlacklistRepository.save(blacklist);
         }
 
         // 3. Xóa cookie access_token
@@ -119,5 +123,14 @@ public class AuthServiceImpl implements AuthService {
         cookie.setMaxAge(0); // xóa cookie
 
         response.addCookie(cookie);
+    }
+
+    // clear blacklist token
+    @Override
+    @Scheduled(cron = "0 0 * * * *") // mỗi phút
+    @Transactional
+    public void cleanExpiredTokens() {
+        int count = tokenBlacklistRepository.deleteByExpiredAtBefore(LocalDateTime.now());
+        System.out.println("Deleted expired tokens: " + count);
     }
 }

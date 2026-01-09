@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,12 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     // List<ProductEntity> findAllProducts();
 
+    // Query theo category name
+    List<ProductEntity> findByCategory_Name(String categoryName);
+
+    List<ProductEntity> findByCreatedAtAfterOrderByCreatedAtDesc(
+            LocalDateTime dateTime);
+
+    List<ProductEntity> findByTotalSoldGreaterThanOrderByTotalSoldDesc(
+            Long totalSold);
 }

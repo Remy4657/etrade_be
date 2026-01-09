@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -27,7 +28,6 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAll().stream()
                 .map(productMapper::toProductResponse)
                 .toList();
-
     }
 
     @Override
@@ -49,5 +49,29 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         return productMapper.toProductDetailResponse(product);
+    }
+
+    @Override
+    public List<ProductResponse> getProductsByCategoryName(String categoryName) {
+        return productRepository.findByCategory_Name(categoryName).stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponse> getNewestProducts() {
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        return productRepository
+                .findByCreatedAtAfterOrderByCreatedAtDesc(thirtyDaysAgo).stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponse> getBestSellerProducts() {
+        return productRepository
+                .findByTotalSoldGreaterThanOrderByTotalSoldDesc(100L).stream()
+                .map(productMapper::toProductResponse)
+                .toList();
     }
 }

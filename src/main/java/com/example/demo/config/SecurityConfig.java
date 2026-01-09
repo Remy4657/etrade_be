@@ -38,10 +38,14 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 // .authorizeHttpRequests(auth -> auth
                 // .anyRequest().permitAll())
+                // không dùng form login / basic
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(logout -> {
                 })
+                // VERIFY GOOGLE ID_TOKEN
+                .oauth2ResourceServer(oauth -> oauth.jwt())
+                // JWT BACKEND (sau OAuth2)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
