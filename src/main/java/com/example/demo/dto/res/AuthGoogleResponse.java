@@ -1,0 +1,17 @@
+package com.example.demo.dto.res;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+
+public class AuthGoogleResponse {
+    private String accessToken;
+    private String refreshToken;
+    private String role;
+    private String email;
+    private String username;
+}

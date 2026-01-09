@@ -3,16 +3,20 @@ package com.example.demo.entity.product;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.example.demo.entity.BaseEntity;
 import com.example.demo.entity.CategoryEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "product")
-public class ProductEntity {
+public class ProductEntity extends BaseEntity {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +39,9 @@ public class ProductEntity {
 
         @Column(name = "thumb_hover")
         private String thumbHover;
+
+        @Column(name = "total_sold")
+        private Long totalSold;
 
         @ManyToOne
         @JoinColumn(name = "category_id", nullable = false)

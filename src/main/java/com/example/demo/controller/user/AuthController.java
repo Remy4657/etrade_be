@@ -1,8 +1,10 @@
 package com.example.demo.controller.user;
 
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -78,5 +80,12 @@ public class AuthController {
         authService.logout(request, response);
         return ResponseEntity.ok("Logout success");
     }
+
+    // @PostMapping("/google")
+    // public ResponseEntity<AuthResponse> loginGoogle(
+    // @AuthenticationPrincipal Jwt jwt) {
+    // return ResponseEntity.ok(
+    // googleAuthService.loginWithGoogle(jwt));
+    // }
 
 }

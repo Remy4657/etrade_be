@@ -40,16 +40,24 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductDetail(id));
     }
 
-    // // USER
-    // @GetMapping("/users")
-    // public List<UserEntity> getAllUsers() {
-    // return userService.getAllUsers();
-    // }
+    @GetMapping("/products/{categoryName}")
+    public ResponseEntity<?> getProductsByCategory(
+            @PathVariable String categoryName) {
 
-    // // USER
-    // @GetMapping("/get-username")
-    // public List<UserEntity> getUsername(UserEntity userEntity) {
-    // return userService.getUserNameEntity(userEntity);
-    // }
+        List<ProductResponse> products = productService.getProductsByCategoryName(categoryName);
+        return ResponseEntity.ok(products);
+    }
 
+    @GetMapping("/products/newest")
+    public ResponseEntity<?> getNewestProducts() {
+        List<ProductResponse> products = productService.getNewestProducts();
+        return ResponseEntity.ok(
+                products);
+    }
+
+    @GetMapping("/products/best-seller")
+    public ResponseEntity<?> getBestSellerProducts() {
+        List<ProductResponse> products = productService.getBestSellerProducts();
+        return ResponseEntity.ok(products);
+    }
 }
