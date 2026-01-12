@@ -27,7 +27,6 @@ public class JwtUtil {
                 .claim("username", username)
                 .claim("email", email)
                 .claim("roles", roles)
-
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 ngày
                 .signWith(key, SignatureAlgorithm.HS256)

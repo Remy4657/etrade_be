@@ -6,10 +6,12 @@ import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.req.LoginRequest;
 import com.example.demo.dto.req.RegisterRequest;
+import com.example.demo.dto.res.AuthGoogleResponse;
 import com.example.demo.dto.res.AuthResponse;
 import com.example.demo.entity.user.RoleEntity;
 import com.example.demo.entity.user.TokenBlacklistEntity;
@@ -38,19 +40,21 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final TokenBlacklistRepository tokenBlacklistRepository;
 
+    private void assignDefaultRole(UserEntity user) {
+        RoleEntity userRole = roleRepository.findByName("user");
+        user.getRoleList().add(userRole);
+    }
+
     @Override
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException("Email already exists");
         }
-        RoleEntity userRole = roleRepository.findByName("user");
-        // .orElseThrow(() -> new RuntimeException("Role USER not found"));
-
         UserEntity user = new UserEntity();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.getRoleList().add(userRole);
+        assignDefaultRole(user);
 
         userRepository.save(user);
         List<String> roles = user.getRoleList()
@@ -62,12 +66,12 @@ public class AuthServiceImpl implements AuthService {
         return new AuthResponse(
                 token,
                 user.getUsername(),
-                user.getEmail());
+                user.getEmail(),
+                roles);
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
-
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -82,7 +86,8 @@ public class AuthServiceImpl implements AuthService {
         return new AuthResponse(
                 token,
                 user.getUsername(),
-                user.getEmail());
+                user.getEmail(),
+                roles);
     }
 
     @Override
@@ -132,5 +137,37 @@ public class AuthServiceImpl implements AuthService {
     public void cleanExpiredTokens() {
         int count = tokenBlacklistRepository.deleteByExpiredAtBefore(LocalDateTime.now());
         System.out.println("Deleted expired tokens: " + count);
+    }
+
+    @Override
+    @Transactional
+    public AuthGoogleResponse loginWithGoogle(Jwt jwt) {
+
+        String email = jwt.getClaim("email");
+        String name = jwt.getClaim("name");
+        String googleSub = jwt.getSubject();
+
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    UserEntity newUser = new UserEntity();
+                    newUser.setEmail(email);
+                    newUser.setUsername(name);
+                    newUser.setProvider("GOOGLE");
+                    newUser.setProviderId(googleSub);
+                    if (newUser.getRoleList().isEmpty()) {
+                        assignDefaultRole(newUser);
+                    }
+                    return userRepository.save(newUser);
+                });
+        List<String> roles = user.getRoleList()
+                .stream()
+                .map(RoleEntity::getName)
+                .toList();
+        return AuthGoogleResponse.builder()
+                .accessToken(jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles))
+                .roles(roles)
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .build();
     }
 }
