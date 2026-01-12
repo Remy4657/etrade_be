@@ -19,11 +19,14 @@ public class UserEntity {
     @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @Column(nullable = false)
     private String email;
+    private String provider; // GOOGLE, LOCAL
+
+    private String providerId; // google sub
 
     // Many-to-Many
     @ManyToMany(fetch = FetchType.LAZY)

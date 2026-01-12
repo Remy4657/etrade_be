@@ -9,7 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import static org.springframework.security.config.Customizer.withDefaults;
 import com.example.demo.security.JwtFilter;
 
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,8 @@ public class SecurityConfig {
                 .logout(logout -> {
                 })
                 // VERIFY GOOGLE ID_TOKEN
-                .oauth2ResourceServer(oauth -> oauth.jwt())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(withDefaults()))
                 // JWT BACKEND (sau OAuth2)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
