@@ -71,7 +71,16 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
         // 2. Lấy token từ COOKIE
-        String token = extractToken(request);
+        // String token = extractToken(request);
+        String token = null;
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            // verify token
+        } else {
+            token = extractToken(request);
+        }
         System.out.println(
                 request.getMethod() + " " + request.getRequestURI() +
                         "==access_token: " + token);

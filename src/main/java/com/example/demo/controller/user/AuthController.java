@@ -89,7 +89,6 @@ public class AuthController {
         // authService.loginWithGoogle(jwt));
         try {
             AuthGoogleResponse res = authService.loginWithGoogle(jwt);
-            System.out.println("[controller login google] res login: " + res);
             Cookie cookie = new Cookie("access_token", res.getAccessToken());
             cookie.setHttpOnly(true);
             cookie.setPath("/");
