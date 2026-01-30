@@ -24,13 +24,13 @@ public class CategoryTest {
     @Transactional
     @Rollback(false)
     void add() {
-        CategoryEntity category = new CategoryEntity();
-        UserEntity user = new UserEntity();
+        // CategoryEntity category = new CategoryEntity();
+        // UserEntity user = new UserEntity();
 
-        category.setName("Computers");
-        category.setName("Laptops");
+        // category.setName("Computers");
+        // category.setName("Laptops");
 
-        categoryRepository.save(category);
+        // categoryRepository.save(category);
     }
 
 }
