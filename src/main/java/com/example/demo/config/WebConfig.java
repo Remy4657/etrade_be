@@ -18,28 +18,15 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000", "http://localhost:3001") // FE domain
+                        .allowedOriginPatterns(
+                                "http://localhost:*",
+                                "http://192.168.*.*:*",
+                                "http://72.62.251.82:*",
+                                "https://72.62.251.82:*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
         };
     }
-
-    // @Bean
-    // public CorsConfigurationSource corsConfigurationSource() {
-    // CorsConfiguration configuration = new CorsConfiguration();
-    // configuration.setAllowedOriginPatterns(
-    // Arrays.asList("*"));
-    // configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT",
-    // "DELETE"));
-    // configuration.setAllowedHeaders(Arrays.asList("*"));
-    // configuration.setExposedHeaders(Arrays.asList("Authorization"));
-    // configuration.setAllowCredentials(true);
-
-    // UrlBasedCorsConfigurationSource source = new
-    // UrlBasedCorsConfigurationSource();
-    // source.registerCorsConfiguration("/**", configuration);
-    // return source;
-    // }
 }
