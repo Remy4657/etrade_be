@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   mysql:
@@ -15,6 +14,8 @@ services:
       retries: 10
     volumes:
       - java_etrade_mysql_data:/var/lib/mysql
+    networks:
+      - etrade-network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -25,10 +26,15 @@ services:
       PMA_HOST: mysql
       PMA_USER: root
       PMA_PASSWORD: root
+    networks:
+      - etrade-network
     depends_on:
       - mysql
 
   backend:
+    build:
+        context: .
+        dockerfile: Dockerfile
     image: remy4657/java_mysql_etrade:latest
     container_name: shop_backend
     depends_on:
@@ -41,6 +47,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
     ports:
       - "8080:8080"
-
+    networks:
+      - etrade-network
+networks:
+  etrade-network:
+    external: true
 volumes:
   java_etrade_mysql_data:

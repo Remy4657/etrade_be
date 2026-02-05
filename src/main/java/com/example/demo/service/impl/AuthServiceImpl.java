@@ -123,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
     private void clearCookie(HttpServletResponse response, String name) {
         Cookie cookie = new Cookie(name, null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // nếu dùng https
+        // cookie.setSecure(true); // nếu dùng https
         cookie.setPath("/");
         cookie.setMaxAge(0); // xóa cookie
 
