@@ -22,7 +22,8 @@ public class WebConfig {
                                 "http://localhost:*",
                                 "http://192.168.*.*:*",
                                 "http://72.62.251.82:*",
-                                "https://72.62.251.82:*")
+                                "https://72.62.251.82:*",
+                                "https://megadeal.dev:*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

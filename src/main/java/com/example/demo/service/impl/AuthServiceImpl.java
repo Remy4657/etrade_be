@@ -142,32 +142,41 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthGoogleResponse loginWithGoogle(Jwt jwt) {
+        try {
+            String email = jwt.getClaim("email");
+            String name = jwt.getClaim("name");
+            System.out.println("email: " + email);
+            System.out.println("name: " + name);
 
-        String email = jwt.getClaim("email");
-        String name = jwt.getClaim("name");
-        String googleSub = jwt.getSubject();
+            String googleSub = jwt.getSubject();
 
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    UserEntity newUser = new UserEntity();
-                    newUser.setEmail(email);
-                    newUser.setUsername(name);
-                    newUser.setProvider("GOOGLE");
-                    newUser.setProviderId(googleSub);
-                    if (newUser.getRoleList().isEmpty()) {
-                        assignDefaultRole(newUser);
-                    }
-                    return userRepository.save(newUser);
-                });
-        List<String> roles = user.getRoleList()
-                .stream()
-                .map(RoleEntity::getName)
-                .toList();
-        return AuthGoogleResponse.builder()
-                .accessToken(jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles))
-                .roles(roles)
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .build();
+            UserEntity user = userRepository.findByEmail(email)
+                    .orElseGet(() -> {
+                        UserEntity newUser = new UserEntity();
+                        newUser.setEmail(email);
+                        newUser.setUsername(name);
+                        newUser.setProvider("GOOGLE");
+                        newUser.setProviderId(googleSub);
+                        if (newUser.getRoleList().isEmpty()) {
+                            assignDefaultRole(newUser);
+                        }
+                        return userRepository.save(newUser);
+                    });
+            List<String> roles = user.getRoleList()
+                    .stream()
+                    .map(RoleEntity::getName)
+                    .toList();
+            return AuthGoogleResponse.builder()
+                    .accessToken(jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles))
+                    .roles(roles)
+                    .email(user.getEmail())
+                    .username(user.getUsername())
+                    .build();
+        } catch (Exception e) {
+            System.err.println("GOOGLE LOGIN ERROR");
+            e.printStackTrace(); // CÁI QUAN TRỌNG NHẤT
+            throw e; // bắt buộc throw lại để NextAuth biết là fail
+        }
+
     }
 }
