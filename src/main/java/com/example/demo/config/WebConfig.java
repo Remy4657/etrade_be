@@ -22,7 +22,7 @@ public class WebConfig {
                                 "http://localhost:*",
                                 "http://192.168.*.*:*",
                                 "http://72.62.251.82:*",
-                                "http://35.223.117.157:*",
+                                "http://136.111.0.240:*",
                                 "https://72.62.251.82:*",
                                 "https://megadeal.dev:*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
