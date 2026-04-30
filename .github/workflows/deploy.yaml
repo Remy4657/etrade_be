@@ -5,7 +5,7 @@ on:
     branches: ["deploy"]
 
 jobs:
-  github-ci-hoangnv:
+  github-ci-remy4657:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +35,6 @@ jobs:
           script: |
             cd ~/project/etrade/be
 
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
+            docker compose pull
+            docker compose down
+            docker compose up -d
