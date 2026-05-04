@@ -43,9 +43,13 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     // cac url trong shouldNotFilter thi doFilterInternal() KHÔNG được gọi
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
+        String servletPath = request.getServletPath();
+        String requestURI = request.getRequestURI();
+        System.out.println("servletPath: " + servletPath);
+        System.out.println("requestURI: " + requestURI);
+
         return EXCLUDE_URLS.stream()
-                .anyMatch(pattern -> matcher.match(pattern, path));
+                .anyMatch(pattern -> matcher.match(pattern, requestURI));
     }
 
     private String extractToken(HttpServletRequest request) {

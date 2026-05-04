@@ -1,4 +1,3 @@
-
 services:
   mysql:
     image: mysql:8
@@ -33,9 +32,9 @@ services:
 
   backend:
     build:
-        context: .
-        dockerfile: Dockerfile
-    image: remy4657/java_mysql_etrade:latest
+      context: .
+      dockerfile: Dockerfile
+    image: remy4657/test-etrade-be-ci:latest
     container_name: shop_backend
     depends_on:
       mysql:
