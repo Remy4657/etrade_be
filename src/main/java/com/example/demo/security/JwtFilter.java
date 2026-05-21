@@ -36,6 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final List<String> EXCLUDE_URLS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
+            "/api/v1/auth/logout",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/uploads/**");
@@ -45,9 +46,11 @@ public class JwtFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String servletPath = request.getServletPath();
         String requestURI = request.getRequestURI();
-        System.out.println("servletPath: " + servletPath);
+        System.out.println("servletPathh: " + servletPath);
         System.out.println("requestURI: " + requestURI);
-
+        // nếu requestURI khớp với bất kỳ pattern nào trong EXCLUDE_URLS thì trả về true
+        // → KHÔNG gọi doFilterInternal() để check JWT, ngược lại trả về false để gọi
+        // doFilterInternal() và check JWT
         return EXCLUDE_URLS.stream()
                 .anyMatch(pattern -> matcher.match(pattern, requestURI));
     }
@@ -69,20 +72,22 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
-        // 1. Nếu đã có authentication rồi thì bỏ qua
+        // Nếu SecurityContext đã có auth (do filter trước set vào) → không cần check
+        // nữa
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response); // cho request đi tiếp
             return;
         }
         // 2. Lấy token từ COOKIE
         // String token = extractToken(request);
         String token = null;
         String authHeader = request.getHeader("Authorization");
-
+        // check header Authorization trước, nếu có thì lấy token từ header, nếu không
+        // có thì fallback lấy token từ cookie
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
+            token = authHeader.substring(7); // code để lấy phần token sau "Bearer "
             // verify token
-        } else {
+        } else { // fallback: lấy token từ cookie nếu không có header Authorization
             token = extractToken(request);
         }
         System.out.println(

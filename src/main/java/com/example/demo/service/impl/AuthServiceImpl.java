@@ -96,14 +96,21 @@ public class AuthServiceImpl implements AuthService {
         // 1. Lấy token từ cookie
         String token = extractTokenFromCookie(request);
 
-        // 2. Revoke token (nếu tồn tại)
-        if (token != null && !tokenBlacklistRepository.existsByToken(token)) {
-            TokenBlacklistEntity blacklist = new TokenBlacklistEntity();
-            blacklist.setToken(token);
-            blacklist.setExpiredAt(jwtUtil.getExpiration(token));
-            tokenBlacklistRepository.save(blacklist);
-        }
+        if (token != null) {
+            try {
+                // chỉ blacklist nếu token hợp lệ và chưa blacklist
+                if (!tokenBlacklistRepository.existsByToken(token)) {
+                    TokenBlacklistEntity blacklist = new TokenBlacklistEntity();
+                    blacklist.setToken(token);
+                    blacklist.setExpiredAt(jwtUtil.getExpiration(token));
+                    tokenBlacklistRepository.save(blacklist);
+                }
 
+            } catch (Exception e) {
+                // token invalid / expired / modified
+                System.out.println("Cannot blacklist token: " + e.getMessage());
+            }
+        }
         // 3. Xóa cookie access_token
         clearCookie(response, "access_token");
     }

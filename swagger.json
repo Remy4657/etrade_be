@@ -1,0 +1,1264 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Etrade API",
+    "description": "API documentation for Etrade application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful registration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successful"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AuthResponse"
+                    }
+                  }
+                },
+                "example": {
+                  "code": 200,
+                  "message": "Successful",
+                  "data": {
+                    "token": "gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                    "expiresIn": 3600,
+                    "user": {
+                      "id": 1,
+                      "username": "john_doe",
+                      "email": "john.doe@example.com",
+                      "fullName": "John Doe",
+                      "phone": "+84 909 123 456",
+                      "address": "123 Nguyen Trai Street, District 1, Ho Chi Minh City",
+                      "role": "USER",
+                      "createdAt": "2026-05-15T10:30:00Z",
+                      "updatedAt": "2026-05-15T14:45:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - User already exists or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Username already exists"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 409
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginRequest"
+                }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successful"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AuthResponse"
+                    }
+                  }
+                },
+                "example": {
+                  "code": 200,
+                  "message": "Successful",
+                  "data": {
+                    "token": "gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                    "expiresIn": 3600,
+                    "user": {
+                      "id": 1,
+                      "username": "john_doe",
+                      "email": "john.doe@example.com",
+                      "fullName": "John Doe",
+                      "phone": "+84 909 123 456",
+                      "address": "123 Nguyen Trai Street, District 1, Ho Chi Minh City",
+                      "role": "USER",
+                      "createdAt": "2026-05-15T10:30:00Z",
+                      "updatedAt": "2026-05-15T14:45:00Z"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "description": "Access token cookie",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 409
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Get current user information",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Logout user",
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Logout successful"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/google": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login with Google",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Google login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successful"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AuthGoogleResponse"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "description": "Access token cookie",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Google login failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 409
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products",
+        "responses": {
+          "200": {
+            "description": "List of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/product/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get product by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Product ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{categoryName}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get products by category name",
+        "parameters": [
+          {
+            "name": "categoryName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Category name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products in category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/newest": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get newest products",
+        "responses": {
+          "200": {
+            "description": "List of newest products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/best-seller": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get best seller products",
+        "responses": {
+          "200": {
+            "description": "List of best seller products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/checkout": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Process checkout",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout successful - Returns order ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get all orders",
+        "responses": {
+          "200": {
+            "description": "List of orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{id}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get order details by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Order ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cart/add": {
+      "post": {
+        "tags": ["Cart"],
+        "summary": "Add item to cart",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddToCartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item added to cart successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Add to cart successfully"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Failed to add item to cart",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 409
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cart/get-current": {
+      "get": {
+        "tags": ["Cart"],
+        "summary": "Get current user's cart",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current cart information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cart/remove-item/{cartItemId}": {
+      "delete": {
+        "tags": ["Cart"],
+        "summary": "Remove item from cart",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cartItemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Cart item ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item removed from cart successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Remove cart item successfully"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Failed to remove item from cart",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 409
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cart/update/{id}": {
+      "put": {
+        "tags": ["Cart"],
+        "summary": "Update cart item quantity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Cart item ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCartItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cart item updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Update success"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get all categories",
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username for registration"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password for registration"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Full name"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          }
+        },
+        "required": ["username", "password", "email"]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password"
+          }
+        },
+        "required": ["username", "password"]
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT access token",
+            "example": "JhbGciOiJIUzIRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Token expiration time in seconds",
+            "example": 3600
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserEntity"
+          }
+        }
+      },
+      "AuthGoogleResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token from Google login",
+            "example": "KxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Token expiration time in seconds",
+            "example": 3600
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserEntity"
+          }
+        }
+      },
+      "UserEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User ID",
+            "example": 1
+          },
+          "username": {
+            "type": "string",
+            "description": "Username",
+            "example": "john_doe"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "example": "john.doe@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Full name",
+            "example": "John Doe"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number",
+            "example": "+84 909 123 456"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address",
+            "example": "123 Nguyen Trai Street, District 1, Ho Chi Minh City"
+          },
+          "role": {
+            "type": "string",
+            "description": "User role (USER, ADMIN)",
+            "example": "USER"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp",
+            "example": "2026-05-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp",
+            "example": "2026-05-15T14:45:00Z"
+          }
+        }
+      },
+      "ProductResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Product ID",
+            "example": 101
+          },
+          "name": {
+            "type": "string",
+            "description": "Product name",
+            "example": "iPhone 15 Pro Max"
+          },
+          "description": {
+            "type": "string",
+            "description": "Product description",
+            "example": "Latest Apple smartphone with titanium design and advanced camera system"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "description": "Product price",
+            "example": 1099.99
+          },
+          "stock": {
+            "type": "integer",
+            "description": "Available stock quantity",
+            "example": 50
+          },
+          "category": {
+            "type": "string",
+            "description": "Product category",
+            "example": "Smartphones"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImageResponse"
+            }
+          },
+          "colors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ColorResponse"
+            }
+          },
+          "sizes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SizeResponse"
+            }
+          }
+        }
+      },
+      "ProductImageResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "url": {
+            "type": "string",
+            "description": "Image URL",
+            "example": "https://example.com/images/iphone15-pro-main.jpg"
+          }
+        }
+      },
+      "ColorResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Color name",
+            "example": "Black"
+          },
+          "code": {
+            "type": "string",
+            "description": "Color code (hex)",
+            "example": "#000000"
+          }
+        }
+      },
+      "SizeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Size name",
+            "example": "Large"
+          }
+        }
+      },
+      "OrderResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Order ID",
+            "example": 1001
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User ID",
+            "example": 1
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "float",
+            "description": "Total order amount",
+            "example": 2199.98
+          },
+          "status": {
+            "type": "string",
+            "description": "Order status (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED)",
+            "example": "CONFIRMED"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order creation timestamp",
+            "example": "2026-05-15T09:15:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order last update timestamp",
+            "example": "2026-05-15T10:30:00Z"
+          }
+        }
+      },
+      "OrderDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Order ID",
+            "example": 1001
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User ID",
+            "example": 1
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "float",
+            "description": "Total order amount",
+            "example": 2199.98
+          },
+          "status": {
+            "type": "string",
+            "description": "Order status",
+            "example": "CONFIRMED"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order creation timestamp",
+            "example": "2026-05-15T09:15:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order last update timestamp",
+            "example": "2026-05-15T10:30:00Z"
+          },
+          "orderItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemResponse"
+            }
+          }
+        }
+      },
+      "OrderItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 5001
+          },
+          "productId": {
+            "type": "integer",
+            "format": "int64",
+            "example": 101
+          },
+          "productName": {
+            "type": "string",
+            "description": "Product name",
+            "example": "iPhone 15 Pro Max"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Quantity ordered",
+            "example": 2
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "description": "Price per unit",
+            "example": 1099.99
+          },
+          "color": {
+            "type": "string",
+            "description": "Selected color",
+            "example": "Black"
+          },
+          "size": {
+            "type": "string",
+            "description": "Selected size",
+            "example": "N/A"
+          }
+        }
+      },
+      "CartResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Cart ID",
+            "example": 2001
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User ID",
+            "example": 1
+          },
+          "cartItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItemResponse"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Cart creation timestamp",
+            "example": "2026-05-15T08:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Cart last update timestamp",
+            "example": "2026-05-15T09:30:00Z"
+          }
+        }
+      },
+      "CartItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 3001
+          },
+          "productId": {
+            "type": "integer",
+            "format": "int64",
+            "example": 101
+          },
+          "productName": {
+            "type": "string",
+            "description": "Product name",
+            "example": "iPhone 15 Pro Max"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Quantity in cart",
+            "example": 2
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "description": "Price per unit",
+            "example": 1099.99
+          },
+          "color": {
+            "type": "string",
+            "description": "Selected color",
+            "example": "Black"
+          },
+          "size": {
+            "type": "string",
+            "description": "Selected size",
+            "example": "N/A"
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float",
+            "description": "Total price for this cart item (quantity * price)",
+            "example": 2199.98
+          }
+        }
+      },
+      "AddToCartRequest": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Product ID to add to cart"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Quantity to add",
+            "minimum": 1
+          },
+          "productColor": {
+            "type": "string",
+            "description": "Selected color"
+          },
+          "productSize": {
+            "type": "string",
+            "description": "Selected size"
+          }
+        },
+        "required": ["productId", "quantity"]
+      },
+      "UpdateCartItemRequest": {
+        "type": "object",
+        "properties": {
+          "typeUpdate": {
+            "type": "string",
+            "description": "Type of update (INCREMENT, DECREMENT, SET)",
+            "enum": ["INCREMENT", "DECREMENT", "SET"]
+          }
+        },
+        "required": ["typeUpdate"]
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "properties": {
+          "cartId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Cart ID to checkout"
+          },
+          "shippingAddress": {
+            "type": "string",
+            "description": "Shipping address"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Payment method"
+          }
+        },
+        "required": ["cartId", "shippingAddress", "paymentMethod"]
+      },
+      "CategoryEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Category ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Category name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Category description"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        }
+      }
+    }
+  }
+}
