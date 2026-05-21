@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -49,7 +50,7 @@ public class JwtUtil {
     // return getClaims(token).getSubject();
     // }
 
-    // 2. Kiểm tra token có hợp lệ không
+    // 2. Validate token (bao gồm cả check hết hạn)
     public boolean validateToken(String token) {
         try {
             Claims claims = getClaims(token);
@@ -72,7 +73,7 @@ public class JwtUtil {
         return expiration.before(new Date());
     }
 
-    // 4. Parse claims (chung)
+    // Lấy claims (bao gồm cả exp, iat, sub, custom claims)
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(

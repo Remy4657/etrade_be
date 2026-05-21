@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo.dto.req.LoginRequest;
 import com.example.demo.dto.req.RegisterRequest;
-import com.example.demo.dto.res.ApiResponse;
 import com.example.demo.dto.res.AuthGoogleResponse;
 import com.example.demo.dto.res.AuthResponse;
 import com.example.demo.dto.res.BaseResponse;
@@ -34,6 +33,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserRepository userRepository;
+    private static final int ACCESS_TOKEN_MAX_AGE = 60 * 60;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -56,7 +56,7 @@ public class AuthController {
             cookie.setHttpOnly(true);
             cookie.setPath("/");
 
-            cookie.setMaxAge(24 * 60 * 60);
+            cookie.setMaxAge(ACCESS_TOKEN_MAX_AGE);
 
             response.addCookie(cookie);
             return new ResponseEntity<>(new BaseResponse<>("Successful", res, 200), HttpStatus.OK);
@@ -79,7 +79,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response) {
         authService.logout(request, response);
-        return ResponseEntity.ok("Logout success");
+        return ResponseEntity.ok("Logout successsful");
     }
 
     @PostMapping("/google")
@@ -93,7 +93,7 @@ public class AuthController {
             cookie.setHttpOnly(true);
             cookie.setPath("/");
 
-            cookie.setMaxAge(24 * 60 * 60);
+            cookie.setMaxAge(ACCESS_TOKEN_MAX_AGE);
 
             response.addCookie(cookie);
             return new ResponseEntity<>(new BaseResponse<>("Successful", res, 200), HttpStatus.OK);
