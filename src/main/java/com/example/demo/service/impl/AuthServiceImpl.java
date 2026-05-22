@@ -1,7 +1,6 @@
 package com.example.demo.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,10 +12,13 @@ import com.example.demo.dto.req.LoginRequest;
 import com.example.demo.dto.req.RegisterRequest;
 import com.example.demo.dto.res.AuthGoogleResponse;
 import com.example.demo.dto.res.AuthResponse;
+import com.example.demo.dto.res.SignupResponse;
+import com.example.demo.entity.user.RefreshTokenEntity;
 import com.example.demo.entity.user.RoleEntity;
 import com.example.demo.entity.user.TokenBlacklistEntity;
 import com.example.demo.entity.user.UserEntity;
 import com.example.demo.exception.CustomException;
+import com.example.demo.repository.RefreshTokenRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.TokenBlacklistRepository;
 import com.example.demo.repository.UserRepository;
@@ -39,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistRepository tokenBlacklistRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private void assignDefaultRole(UserEntity user) {
         RoleEntity userRole = roleRepository.findByName("user");
@@ -46,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public SignupResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException("Email already exists");
         }
@@ -61,10 +64,9 @@ public class AuthServiceImpl implements AuthService {
                 .stream()
                 .map(RoleEntity::getName)
                 .toList();
-        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles);
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getId(), user.getEmail(), roles);
 
-        return new AuthResponse(
-                token,
+        return new SignupResponse(
                 user.getUsername(),
                 user.getEmail(),
                 roles);
@@ -82,9 +84,24 @@ public class AuthServiceImpl implements AuthService {
                 .stream()
                 .map(RoleEntity::getName)
                 .toList();
-        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles);
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getId(), user.getEmail(), roles);
+        String refreshToken = jwtUtil.generateRefreshToken(
+                user);
+
+        RefreshTokenEntity tokenEntity = RefreshTokenEntity.builder()
+                .token(refreshToken)
+                .expiredAt(
+                        LocalDateTime.now()
+                                .plusDays(1))
+                .revoked(false)
+                .user(user)
+                .build();
+
+        refreshTokenRepository.save(
+                tokenEntity);
         return new AuthResponse(
-                token,
+                accessToken,
+                refreshToken,
                 user.getUsername(),
                 user.getEmail(),
                 roles);
@@ -99,6 +116,8 @@ public class AuthServiceImpl implements AuthService {
         if (token != null) {
             try {
                 // chỉ blacklist nếu token hợp lệ và chưa blacklist
+                // backlist để ngăn token đó tiếp tục được sử dụng (nếu có ai đó ăn cắp được
+                // token thì cũng chỉ dùng được đến khi token hết hạn)
                 if (!tokenBlacklistRepository.existsByToken(token)) {
                     TokenBlacklistEntity blacklist = new TokenBlacklistEntity();
                     blacklist.setToken(token);
@@ -174,7 +193,7 @@ public class AuthServiceImpl implements AuthService {
                     .map(RoleEntity::getName)
                     .toList();
             return AuthGoogleResponse.builder()
-                    .accessToken(jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles))
+                    .accessToken(jwtUtil.generateAccessToken(user.getUsername(), user.getId(), user.getEmail(), roles))
                     .roles(roles)
                     .email(user.getEmail())
                     .username(user.getUsername())
@@ -184,6 +203,56 @@ public class AuthServiceImpl implements AuthService {
             e.printStackTrace(); // CÁI QUAN TRỌNG NHẤT
             throw e; // bắt buộc throw lại để NextAuth biết là fail
         }
+
+    }
+
+    @Override
+    public String refreshToken(
+            String refreshToken) {
+
+        if (refreshToken == null) {
+
+            throw new RuntimeException(
+                    "Refresh token missing");
+        }
+
+        RefreshTokenEntity tokenEntity = refreshTokenRepository
+                .findByToken(
+                        refreshToken)
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "Refresh token invalid"));
+
+        if (tokenEntity.isRevoked()) {
+
+            throw new RuntimeException(
+                    "Refresh token revoked");
+        }
+
+        if (jwtUtil.isTokenExpired(
+                refreshToken)) {
+
+            refreshTokenRepository.delete(
+                    tokenEntity);
+
+            throw new RuntimeException(
+                    "Refresh token expired");
+        }
+
+        UserEntity user = tokenEntity.getUser();
+
+        List<String> roles = user.getRoleList()
+                .stream()
+                .map(
+                        role -> role.getName())
+                .toList();
+
+        return jwtUtil
+                .generateAccessToken(
+                        user.getUsername(),
+                        user.getId(),
+                        user.getEmail(),
+                        roles);
 
     }
 }

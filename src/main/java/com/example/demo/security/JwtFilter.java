@@ -17,11 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.demo.repository.TokenBlacklistRepository;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
@@ -36,6 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final List<String> EXCLUDE_URLS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
+            "/api/v1/auth/refresh",
             "/api/v1/auth/logout",
             "/swagger-ui/**",
             "/v3/api-docs/**",
@@ -106,7 +103,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 throw new RuntimeException("Token revoked");
             }
             // 3. Validate token (expire, signature, etc.)
-            if (!jwtUtil.validateToken(token)) {
+            if (jwtUtil.isTokenExpired(token)) { // invalid token
                 filterChain.doFilter(request, response);
                 return;
             }

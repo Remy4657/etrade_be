@@ -112,10 +112,13 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(
                                                                 "/api/v1/products/**",
+                                                                "/api/v1/product/**",
+
                                                                 "/api/v1/categories/**",
                                                                 "/api/v1/auth/login",
                                                                 "/api/v1/auth/logout",
                                                                 "/api/v1/auth/register",
+                                                                "/api/v1/auth/refresh",
                                                                 "/swagger-ui/**",
                                                                 "/v3/api-docs/**")
                                                 .permitAll() // cho phép truy cập không cần auth
