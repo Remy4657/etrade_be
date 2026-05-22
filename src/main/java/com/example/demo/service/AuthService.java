@@ -7,13 +7,14 @@ import com.example.demo.dto.req.LoginRequest;
 import com.example.demo.dto.req.RegisterRequest;
 import com.example.demo.dto.res.AuthGoogleResponse;
 import com.example.demo.dto.res.AuthResponse;
+import com.example.demo.dto.res.SignupResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public interface AuthService {
-    AuthResponse register(RegisterRequest request);
+    SignupResponse register(RegisterRequest request);
 
     AuthResponse login(LoginRequest request);
 
@@ -22,4 +23,7 @@ public interface AuthService {
     void cleanExpiredTokens();
 
     AuthGoogleResponse loginWithGoogle(Jwt jwt);
+
+    String refreshToken(
+            String refreshToken);
 }

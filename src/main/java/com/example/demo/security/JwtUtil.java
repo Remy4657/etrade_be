@@ -9,18 +9,23 @@ import java.time.ZoneId;
 
 import org.springframework.stereotype.Component;
 
+import com.example.demo.config.JwtConfig;
+import com.example.demo.entity.user.UserEntity;
+
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
+    private final JwtConfig jwtConfig;
     private final String SECRET = "SECRET123456789123456789SECRET123456789123456789"; // nên dài >= 256 bit
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8)); // tạo key từ secret
 
-    public String generateToken(String username, Long userId, String email, List<String> roles) {
+    public String generateAccessToken(String username, Long userId, String email, List<String> roles) {
         return Jwts.builder()
                 // định danh chính
                 .setSubject(String.valueOf(userId)) // userId
@@ -29,18 +34,23 @@ public class JwtUtil {
                 .claim("email", email)
                 .claim("roles", roles)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 ngày
+                .setExpiration(new Date(System.currentTimeMillis() + jwtConfig
+                        .getAccessTokenExpiration()
+                        * 1000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String getUserId(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public String generateRefreshToken(UserEntity user) {
+
+        return Jwts.builder()
+                .setSubject(String.valueOf(
+                        user.getEmail())) // có thể để email hoặc userId tùy nhu cầu, ở đây để email cho dễ debug
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtConfig.getRefreshTokenExpiration() * 1000))
+                .signWith(
+                        key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // ===============================
@@ -51,33 +61,22 @@ public class JwtUtil {
     // }
 
     // 2. Validate token (bao gồm cả check hết hạn)
-    public boolean validateToken(String token) {
+    public boolean isTokenExpired(String token) {
         try {
             Claims claims = getClaims(token);
-            System.out.println("claims " + claims);
-
+            Date expiration = claims.getExpiration();
             // check hết hạn
-            return !isTokenExpired(claims);
+            return expiration.before(new Date());
 
         } catch (Exception e) {
             return false;
         }
     }
 
-    // 3. Kiểm tra token hết hạn
-    private boolean isTokenExpired(Claims claims) {
-        Date expiration = claims.getExpiration();
-        System.out.println("expiration " + expiration);
-        System.out.println("new date " + new Date());
-
-        return expiration.before(new Date());
-    }
-
     // Lấy claims (bao gồm cả exp, iat, sub, custom claims)
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(
-                        getSignKey())
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -91,20 +90,20 @@ public class JwtUtil {
                 .toLocalDateTime();
     }
 
-    // Parse claims
-    // extractAllClaims: Parse+validate+ trả payload
-    // extractUserId: Lấy 1 field từ claims
-    // getExpiration: Lấy exp
-
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    private Key getSignKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    public String getUserId(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 }

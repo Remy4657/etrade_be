@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AuthGoogleResponse {
     private String accessToken;
+    private String refreshToken;
     private List<String> roles;
     private String email;
     private String username;
