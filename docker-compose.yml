@@ -20,7 +20,7 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: etrade_phpmyadmin
     ports:
-      - "8081:80"
+      - "8081:80" # trên local sẽ truy cập phpMyAdmin qua cổng 8081, bên trong container sẽ chạy trên cổng 80
     environment:
       PMA_HOST: mysql
       PMA_USER: root
@@ -31,7 +31,7 @@ services:
       - mysql
 
   backend:
-    build:
+    build: #  len vps thi bo di
       context: .
       dockerfile: Dockerfile
     image: remy4657/test-etrade-be-ci:latest
@@ -45,7 +45,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     ports:
-      - "8080:8080"
+      - "8080:8080" # trên local sẽ truy cập backend qua cổng 8080, bên trong container sẽ chạy trên cổng 8080
     networks:
       - etrade-network
 networks:

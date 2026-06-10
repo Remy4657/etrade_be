@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.demo.repository.TokenBlacklistRepository;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -26,7 +24,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
-    private final TokenBlacklistRepository tokenBlacklistRepository;
     private static final AntPathMatcher matcher = new AntPathMatcher();
 
     private static final List<String> EXCLUDE_URLS = List.of(
@@ -78,15 +75,8 @@ public class JwtFilter extends OncePerRequestFilter {
         // 2. Lấy token từ COOKIE
         // String token = extractToken(request);
         String token = null;
-        String authHeader = request.getHeader("Authorization");
-        // check header Authorization trước, nếu có thì lấy token từ header, nếu không
-        // có thì fallback lấy token từ cookie
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // code để lấy phần token sau "Bearer "
-            // verify token
-        } else { // fallback: lấy token từ cookie nếu không có header Authorization
-            token = extractToken(request);
-        }
+        token = extractToken(request);
+        // }
         System.out.println(
                 request.getMethod() + " " + request.getRequestURI() +
                         "==access_token: " + token);
@@ -99,20 +89,18 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             // 2.5 CHECK TOKEN CÓ BỊ REVOKE KHÔNG
-            if (tokenBlacklistRepository.existsByToken(token)) {
-                throw new RuntimeException("Token revoked");
-            }
+            // if (tokenBlacklistRepository.existsByToken(token)) {
+            // throw new RuntimeException("Token revoked");
+            // }
             // 3. Validate token (expire, signature, etc.)
-            if (jwtUtil.isTokenExpired(token)) { // invalid token
-                filterChain.doFilter(request, response);
-                return;
-            }
+            // if (jwtUtil.isTokenExpired(token)) { // invalid token
+            // filterChain.doFilter(request, response);
+            // return;
+            // }
             // 4. Giải mã token → lấy userId
-            Long userId = Long.parseLong(jwtUtil.getUserId(token));
-            System.out.println("userId1: " + userId);
+            Long userId = Long.parseLong(jwtUtil.getUserId(token)); // nếu sửa token thì chỗ này lỗi sẽ rơi vào catch
 
             if (userId != null) {
-                System.out.println("userId2: " + userId);
                 // 5. Tạo Authentication
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userId,
