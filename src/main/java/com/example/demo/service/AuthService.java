@@ -20,10 +20,7 @@ public interface AuthService {
 
     void logout(HttpServletRequest request, HttpServletResponse response);
 
-    void cleanExpiredTokens();
-
     AuthGoogleResponse loginWithGoogle(Jwt jwt);
 
-    String refreshToken(
-            String refreshToken);
+    String refreshToken(String refreshToken);
 }

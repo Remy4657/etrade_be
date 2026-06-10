@@ -38,7 +38,6 @@ public class AuthController {
     private final AuthService authService;
     private final UserRepository userRepository;
     private final JwtConfig jwtConfig;
-    private static final int ACCESS_TOKEN_MAX_AGE = 60 * 60;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -57,17 +56,13 @@ public class AuthController {
         try {
             AuthResponse res = authService.login(request);
             // set access token
-            Cookie cookie = new Cookie("access_token", res.getAccessToken());
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-
-            cookie.setMaxAge((int) jwtConfig
-                    .getAccessTokenExpiration()); // nhận vào giây, ở đây là 1h
-
-            response.addCookie(cookie);
+            Cookie accessCookie = new Cookie("access_token", res.getAccessToken());
+            accessCookie.setHttpOnly(true);
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge((int) jwtConfig.getAccessTokenExpiration()); // nhận vào giây, ở đây là 1h
+            response.addCookie(accessCookie);
 
             // set refresh token
-            System.out.println("Refresh token: " + res.getRefreshToken());
             Cookie refreshCookie = new Cookie("refresh_token", res.getRefreshToken());
             refreshCookie.setHttpOnly(true);
             refreshCookie.setPath("/"); // chỉ gửi cookie khi call đúng endpoint này
@@ -98,17 +93,21 @@ public class AuthController {
     }
 
     @PostMapping("/google")
-    public ResponseEntity<?> loginGoogle(
-            @AuthenticationPrincipal Jwt jwt, HttpServletResponse response) {
-        // return ResponseEntity.ok(
-        // authService.loginWithGoogle(jwt));
+    public ResponseEntity<?> loginGoogle(@AuthenticationPrincipal Jwt jwt, HttpServletResponse response) {
         try {
             AuthGoogleResponse res = authService.loginWithGoogle(jwt);
-            Cookie cookie = new Cookie("access_token", res.getAccessToken());
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(ACCESS_TOKEN_MAX_AGE);
-            response.addCookie(cookie);
+            Cookie accessCookie = new Cookie("access_token", res.getAccessToken());
+            accessCookie.setHttpOnly(true);
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge((int) jwtConfig.getAccessTokenExpiration());
+            response.addCookie(accessCookie);
+
+            // set refresh token
+            Cookie refreshCookie = new Cookie("refresh_token", res.getRefreshToken());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/"); // chỉ gửi cookie khi call đúng endpoint này
+            refreshCookie.setMaxAge((int) jwtConfig.getRefreshTokenExpiration()); // 1 ngày
+            response.addCookie(refreshCookie);
             return new ResponseEntity<>(new BaseResponse<>("Đăng nhập thành công", res, 200), HttpStatus.OK);
         } catch (RuntimeException e) {
             return ResponseEntity
@@ -123,47 +122,28 @@ public class AuthController {
             HttpServletResponse response) {
 
         String refreshToken = null;
-
         Cookie[] cookies = request.getCookies();
 
         if (cookies != null) {
-
             for (Cookie cookie : cookies) {
-
-                if ("refresh_token"
-                        .equals(
-                                cookie.getName())) {
-
+                if ("refresh_token".equals(cookie.getName())) {
                     refreshToken = cookie.getValue();
-
                     break;
                 }
             }
         }
-
-        String newAccessToken = authService
-                .refreshToken(
-                        refreshToken);
-
+        String newAccessToken = authService.refreshToken(refreshToken);
         Cookie accessCookie = new Cookie(
                 "access_token",
                 newAccessToken);
 
-        accessCookie.setHttpOnly(
-                true);
-
+        accessCookie.setHttpOnly(true);
         accessCookie.setPath("/");
+        accessCookie.setMaxAge((int) jwtConfig.getAccessTokenExpiration());
 
-        accessCookie.setMaxAge(
-                (int) jwtConfig
-                        .getAccessTokenExpiration());
-
-        response.addCookie(
-                accessCookie);
+        response.addCookie(accessCookie);
 
         return ResponseEntity.ok(
-                Map.of(
-                        "message",
-                        "Refresh token success"));
+                Map.of("message", "Refresh token success"));
     }
 }

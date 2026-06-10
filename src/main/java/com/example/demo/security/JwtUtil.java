@@ -6,12 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
 import org.springframework.stereotype.Component;
-
 import com.example.demo.config.JwtConfig;
 import com.example.demo.entity.user.UserEntity;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -36,7 +33,7 @@ public class JwtUtil {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtConfig
                         .getAccessTokenExpiration()
-                        * 1000))
+                        * 1000)) // nhận vào giây, ở đây là 1h
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -53,14 +50,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // ===============================
-    // 1. Lấy username từ token
-    // ===============================
-    // public String getUsername(String token) {
-    // return getClaims(token).getSubject();
-    // }
-
-    // 2. Validate token (bao gồm cả check hết hạn)
+    // Validate token (bao gồm cả check hết hạn)
     public boolean isTokenExpired(String token) {
         try {
             Claims claims = getClaims(token);
