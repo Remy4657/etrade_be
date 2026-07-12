@@ -13,6 +13,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -74,18 +76,10 @@ public class JwtUtil {
 
     // Lấy expiration
     public LocalDateTime getExpiration(String token) {
-        Date exp = extractAllClaims(token).getExpiration();
+        Date exp = getClaims(token).getExpiration();
         return exp.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
-    }
-
-    public Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
     }
 
     public String getUserId(String token) {
@@ -95,5 +89,19 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    //
+
+    public String getToken(HttpServletRequest request, String tokenName) {
+        if (request.getCookies() == null)
+            return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if (tokenName.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 }

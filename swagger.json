@@ -100,9 +100,9 @@
           "required": true,
           "content": {
             "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginRequest"
-                }
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
             }
           }
         },
@@ -430,79 +430,20 @@
         }
       }
     },
-    "/api/v1/orders/checkout": {
-      "post": {
-        "tags": ["Orders"],
-        "summary": "Process checkout",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CheckoutRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Checkout successful - Returns order ID",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int64"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/orders": {
+    "/api/v1/categories": {
       "get": {
-        "tags": ["Orders"],
-        "summary": "Get all orders",
+        "tags": ["Categories"],
+        "summary": "Get all categories",
         "responses": {
           "200": {
-            "description": "List of orders",
+            "description": "List of categories",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/OrderResponse"
+                    "$ref": "#/components/schemas/CategoryEntity"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/orders/{id}": {
-      "get": {
-        "tags": ["Orders"],
-        "summary": "Get order details by ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Order ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Order details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderDetailResponse"
                 }
               }
             }
@@ -700,20 +641,80 @@
         }
       }
     },
-    "/api/v1/categories": {
+
+    "/api/v1/orders": {
       "get": {
-        "tags": ["Categories"],
-        "summary": "Get all categories",
+        "tags": ["Orders"],
+        "summary": "Get all orders",
         "responses": {
           "200": {
-            "description": "List of categories",
+            "description": "List of orders",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CategoryEntity"
+                    "$ref": "#/components/schemas/OrderResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{id}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get order details by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Order ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/checkout": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Process checkout",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout successful - Returns order ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             }

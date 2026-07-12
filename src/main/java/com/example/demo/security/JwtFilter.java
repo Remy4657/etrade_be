@@ -22,8 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
+
     private static final AntPathMatcher matcher = new AntPathMatcher();
 
     private static final List<String> EXCLUDE_URLS = List.of(
@@ -33,32 +33,21 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/v1/auth/logout",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/uploads/**");
+            "/uploads/**",
+            "/api/v1/products/**",
+            "/api/v1/product/**",
+            "/api/v1/categories/**");
 
     @Override
     // cac url trong shouldNotFilter thi doFilterInternal() KHÔNG được gọi
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String servletPath = request.getServletPath();
         String requestURI = request.getRequestURI();
-        System.out.println("servletPathh: " + servletPath);
-        System.out.println("requestURI: " + requestURI);
+
         // nếu requestURI khớp với bất kỳ pattern nào trong EXCLUDE_URLS thì trả về true
         // → KHÔNG gọi doFilterInternal() để check JWT, ngược lại trả về false để gọi
         // doFilterInternal() và check JWT
         return EXCLUDE_URLS.stream()
                 .anyMatch(pattern -> matcher.match(pattern, requestURI));
-    }
-
-    private String extractToken(HttpServletRequest request) {
-        if (request.getCookies() == null)
-            return null;
-
-        for (Cookie cookie : request.getCookies()) {
-            if ("access_token".equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-        return null;
     }
 
     @Override
@@ -72,33 +61,63 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response); // cho request đi tiếp
             return;
         }
-        // 2. Lấy token từ COOKIE
-        // String token = extractToken(request);
-        String token = null;
-        token = extractToken(request);
-        // }
-        System.out.println(
-                request.getMethod() + " " + request.getRequestURI() +
-                        "==access_token: " + token);
-        // Không có token → cho request đi tiếp (controller sẽ bị chặn nếu cần auth được
-        // cấu hình ở config)
-        if (token == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         try {
+            // 2. Lấy accessToken từ COOKIE
+            // String accessToken = getAccessToken(request);
+            String refreshToken = jwtUtil.getToken(request, "refresh_token");
+            String accessToken = jwtUtil.getToken(request, "access_token");
+
+            // }
+            System.out.println(
+                    request.getMethod() + " " + request.getRequestURI() +
+                            "==access_token: " + accessToken);
+            System.out.println(
+                    request.getMethod() + " " + request.getRequestURI() +
+                            "==refresh_token: " + refreshToken);
+
+            // Không có accessToken → cho request đi tiếp (controller sẽ bị chặn nếu cần
+            // auth được
+            // cấu hình ở config)
+            if (refreshToken == null) {
+                System.out.println("refresh = null");
+                // filterChain.doFilter(request, response);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+
+                String json = "{\"code\":401, \"error\":\"Unauthorized\", \"message\":\"Token không hợp lệ hoặc hết hạn\"}";
+
+                response.getWriter().write(json);
+                response.getWriter().flush();
+                return;
+            }
+            System.out.println("refresh != null");
+
+            if (accessToken == null) {
+                // filterChain.doFilter(request, response);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+
+                String json = "{\"code\":403, \"error\":\"Unauthorized\", \"message\":\"Bạn không có có quyền cho chức năng này\"}";
+
+                response.getWriter().write(json);
+                response.getWriter().flush();
+                return;
+            }
             // 2.5 CHECK TOKEN CÓ BỊ REVOKE KHÔNG
-            // if (tokenBlacklistRepository.existsByToken(token)) {
+            // if (tokenBlacklistRepository.existsByToken(accessToken)) {
             // throw new RuntimeException("Token revoked");
             // }
-            // 3. Validate token (expire, signature, etc.)
-            // if (jwtUtil.isTokenExpired(token)) { // invalid token
+            // 3. Validate accessToken (expire, signature, etc.)
+            // if (jwtUtil.isTokenExpired(accessToken)) { // invalid accessToken
             // filterChain.doFilter(request, response);
             // return;
             // }
-            // 4. Giải mã token → lấy userId
-            Long userId = Long.parseLong(jwtUtil.getUserId(token)); // nếu sửa token thì chỗ này lỗi sẽ rơi vào catch
+            // 4. Giải mã accessToken → lấy userId
+            Long userId = Long.parseLong(jwtUtil.getUserId(accessToken)); // nếu sửa accessToken thì chỗ này lỗi sẽ rơi
+                                                                          // vào catch
 
             if (userId != null) {
                 // 5. Tạo Authentication

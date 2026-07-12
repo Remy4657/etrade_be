@@ -22,6 +22,7 @@ import com.example.demo.dto.res.AuthResponse;
 import com.example.demo.dto.res.BaseResponse;
 import com.example.demo.dto.res.SignupResponse;
 import com.example.demo.entity.user.UserEntity;
+import com.example.demo.exception.AppExceptions.UnauthorizedError;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.AuthService;
 
@@ -41,47 +42,42 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            SignupResponse res = authService.register(request);
-            return new ResponseEntity<>(new BaseResponse<>("Đăng ký thành công", res, 200), HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(new BaseResponse<>(e.getMessage(), 409));
-        }
+
+        SignupResponse res = authService.register(request);
+        return new ResponseEntity<>(new BaseResponse<>("Đăng ký thành công", res, 200), HttpStatus.OK);
+
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
-        try {
-            AuthResponse res = authService.login(request);
-            // set access token
-            Cookie accessCookie = new Cookie("access_token", res.getAccessToken());
-            accessCookie.setHttpOnly(true);
-            accessCookie.setPath("/");
-            accessCookie.setMaxAge((int) jwtConfig.getAccessTokenExpiration()); // nhận vào giây, ở đây là 1h
-            response.addCookie(accessCookie);
 
-            // set refresh token
-            Cookie refreshCookie = new Cookie("refresh_token", res.getRefreshToken());
-            refreshCookie.setHttpOnly(true);
-            refreshCookie.setPath("/"); // chỉ gửi cookie khi call đúng endpoint này
-            refreshCookie.setMaxAge((int) jwtConfig.getRefreshTokenExpiration()); // 1 ngày
-            response.addCookie(refreshCookie);
+        AuthResponse res = authService.login(request);
+        // set access token
+        Cookie accessCookie = new Cookie("access_token", res.getAccessToken());
+        accessCookie.setHttpOnly(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge((int) jwtConfig.getAccessTokenExpiration()); // nhận vào giây, ở đây là 1h
+        response.addCookie(accessCookie);
 
-            return new ResponseEntity<>(new BaseResponse<>("Đăng nhập thành công", res, 200), HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(new BaseResponse<>(e.getMessage(), 409));
-        }
+        // set refresh token
+        Cookie refreshCookie = new Cookie("refresh_token", res.getRefreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/"); // chỉ gửi cookie khi call đúng endpoint này
+        refreshCookie.setMaxAge((int) jwtConfig.getRefreshTokenExpiration()); // 1 ngày
+        response.addCookie(refreshCookie);
+
+        return new ResponseEntity<>(new BaseResponse<>("Đăng nhập thành công", res,
+                200), HttpStatus.OK);
+
     }
 
     @GetMapping("/me")
     public UserEntity me(Authentication authentication) {
+
         Long userId = Long.parseLong(authentication.getName());
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+                .orElseThrow(() -> new UnauthorizedError("user not found"));
+
     }
 
     @PostMapping("/logout")
