@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+        @Autowired
         private final JwtFilter jwtFilter;
 
         // cấu hình cors
@@ -58,14 +60,15 @@ public class SecurityConfig {
          * authenticated()
          * ↓
          * controller
-         * 
+         *
          * Spring tự verify Google ID Token bằng cách cấu hình
          * .oauth2ResourceServer().jwt()
          * Nếu token hợp lệ, Spring sẽ tạo Authentication object và lưu vào
          * SecurityContext
          * Không có .addFilterBefore(jwtFilter, ...) vì Google ID Token đã được Spring
+         * verify
          * (nên JwtFilter không chạy.)
-         * verify tự động
+         *
          */
         @Bean
         @Order(1)
@@ -88,7 +91,7 @@ public class SecurityConfig {
          * Ví dụ:
          * GET /api/v1/users/me
          * Cookie: access_token=abc
-         * 
+         *
          * /api/v1/users/me
          * ↓
          * apiChain
@@ -123,11 +126,8 @@ public class SecurityConfig {
                                                 .anyRequest().authenticated()) // các request khác cần auth
                                 .httpBasic(AbstractHttpConfigurer::disable)
                                 .formLogin(AbstractHttpConfigurer::disable)
-
                                 // JWT BACKEND FILTER
-
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
                 return http.build();
         }
 

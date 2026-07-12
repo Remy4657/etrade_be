@@ -11,7 +11,6 @@ import com.example.demo.entity.product.ProductEntity;
 
 @Service
 public interface ProductService {
-    // ProductEntity createProduct(ProductEntity product);
     List<ProductResponse> findAllProducts();
 
     BigDecimal calculateSalePrice(ProductEntity product);

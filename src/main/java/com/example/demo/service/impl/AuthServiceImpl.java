@@ -17,7 +17,8 @@ import com.example.demo.dto.res.SignupResponse;
 import com.example.demo.entity.user.RefreshTokenEntity;
 import com.example.demo.entity.user.RoleEntity;
 import com.example.demo.entity.user.UserEntity;
-import com.example.demo.exception.CustomException;
+import com.example.demo.exception.AppExceptions.*;
+
 import com.example.demo.repository.RefreshTokenRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
@@ -58,8 +59,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public SignupResponse register(RegisterRequest request) {
+
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new CustomException("Email already exists");
+            throw new ConflictRequestError("Email already exists");
         }
         UserEntity user = new UserEntity();
         user.setUsername(request.getUsername());
@@ -85,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Wrong password");
+            throw new UnauthorizedError("Wrong password");
         }
         List<String> roles = user.getRoleList()
                 .stream()
@@ -230,20 +232,20 @@ public class AuthServiceImpl implements AuthService {
     public String refreshToken(String refreshToken) {
 
         if (refreshToken == null) {
-            throw new RuntimeException("Refresh token missing");
+            throw new UnauthorizedError("Refresh token missing");
         }
         RefreshTokenEntity tokenEntity = refreshTokenRepository
                 .findByToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Refresh token invalid"));
+                .orElseThrow(() -> new UnauthorizedError("Refresh token invalid"));
 
         if (tokenEntity.isRevoked()) {
-            throw new RuntimeException("Refresh token revoked");
+            throw new UnauthorizedError("Refresh token revoked");
         }
 
         if (jwtUtil.isTokenExpired(refreshToken)) { // token hết hạn thì xóa luôn trong db
             refreshTokenRepository.delete(tokenEntity);
 
-            throw new RuntimeException(
+            throw new UnauthorizedError(
                     "Refresh token expired");
         }
 

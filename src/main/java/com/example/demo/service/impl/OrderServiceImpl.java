@@ -4,14 +4,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.req.CheckoutRequest;
 import com.example.demo.dto.res.OrderDetailResponse;
-import com.example.demo.dto.res.OrderItemResponse;
 import com.example.demo.dto.res.OrderResponse;
-import com.example.demo.dto.res.PaymentResponse;
-import com.example.demo.dto.res.ShippingResponse;
 import com.example.demo.entity.order.OrderEntity;
 import com.example.demo.entity.order.OrderItemEntity;
 import com.example.demo.entity.payment.PaymentEntity;
@@ -23,7 +21,6 @@ import com.example.demo.mapper.OrderDetailMapper;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.PaymentRepository;
-import com.example.demo.repository.ShippingRepository;
 
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.repository.ShippingMethodRepository;
@@ -118,7 +115,7 @@ public class OrderServiceImpl implements OrderService {
 
         @Override
         public List<OrderResponse> getAllOrders() {
-                return orderRepository.findAll()
+                return orderRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
                                 .stream()
                                 .map(orderMapper::mapToResponse)
                                 .toList();
