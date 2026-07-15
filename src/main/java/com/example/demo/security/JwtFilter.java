@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtUtils jwtUtil;
 
     private static final AntPathMatcher matcher = new AntPathMatcher();
 
@@ -68,7 +68,6 @@ public class JwtFilter extends OncePerRequestFilter {
             String refreshToken = jwtUtil.getToken(request, "refresh_token");
             String accessToken = jwtUtil.getToken(request, "access_token");
 
-            // }
             System.out.println(
                     request.getMethod() + " " + request.getRequestURI() +
                             "==access_token: " + accessToken);
@@ -77,10 +76,8 @@ public class JwtFilter extends OncePerRequestFilter {
                             "==refresh_token: " + refreshToken);
 
             // Không có accessToken → cho request đi tiếp (controller sẽ bị chặn nếu cần
-            // auth được
-            // cấu hình ở config)
+            // auth được cấu hình ở config)
             if (refreshToken == null) {
-                System.out.println("refresh = null");
                 // filterChain.doFilter(request, response);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
@@ -92,7 +89,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 response.getWriter().flush();
                 return;
             }
-            System.out.println("refresh != null");
 
             if (accessToken == null) {
                 // filterChain.doFilter(request, response);
@@ -116,9 +112,10 @@ public class JwtFilter extends OncePerRequestFilter {
             // return;
             // }
             // 4. Giải mã accessToken → lấy userId
-            Long userId = Long.parseLong(jwtUtil.getUserId(accessToken)); // nếu sửa accessToken thì chỗ này lỗi sẽ rơi
-                                                                          // vào catch
+            Long userId = Long.parseLong(jwtUtil.getUserId(accessToken)); // nếu accessToken không hợp lệ thì chỗ này
+                                                                          // lỗi sẽ rơi vào catch
 
+            System.out.println("userIdContext " + userId);
             if (userId != null) {
                 // 5. Tạo Authentication
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

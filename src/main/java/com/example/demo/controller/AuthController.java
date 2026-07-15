@@ -113,7 +113,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(
+    public ResponseEntity<String> refresh(
             HttpServletRequest request,
             HttpServletResponse response) {
 
@@ -139,7 +139,6 @@ public class AuthController {
 
         response.addCookie(accessCookie);
 
-        return ResponseEntity.ok(
-                Map.of("message", "Refresh token success"));
+        return ResponseEntity.ok("Refresh token success");
     }
 }
