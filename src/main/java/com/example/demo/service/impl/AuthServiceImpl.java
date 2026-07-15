@@ -23,7 +23,7 @@ import com.example.demo.repository.RefreshTokenRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 
-import com.example.demo.security.JwtUtil;
+import com.example.demo.security.JwtUtils;
 import com.example.demo.service.AuthService;
 
 import jakarta.servlet.http.Cookie;
@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final JwtUtils jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
 
     private void assignDefaultRole(UserEntity user) {

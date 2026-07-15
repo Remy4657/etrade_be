@@ -1,7 +1,19 @@
-POST http://localhost:8080/api/v1/auth/login HTTP/1.1
+# POST http://localhost:8080/api/v1/auth/login HTTP/1.1
+# content-type: application/json
+
+# {
+#   "email": "test2@gmail.com",
+#   "password": "123456"
+# }
+
+# POST http://localhost:8080/api/v1/wishlist?productId=2 HTTP/1.1
+# content-type: application/json
+
+# delete http://localhost:8080/api/v1/wishlist?userId=25&productId=2 HTTP/1.1
+# content-type: application/json
+
+GET http://localhost:8080/api/v1/wishlist?userId=25 HTTP/1.1
 content-type: application/json
 
-{
-  "email": "test2@gmail.com",
-  "password": "123456"
-}
+
+

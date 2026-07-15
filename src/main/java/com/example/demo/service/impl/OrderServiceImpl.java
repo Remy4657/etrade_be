@@ -65,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
                 shipping.setAddress(request.getShipping().getAddress());
                 shipping.setCity(request.getShipping().getCity());
                 shipping.setNotes(request.getShipping().getNotes());
-                shipping.setShippingStatus("PENDING");
+                shipping.setShippingStatus("Đang xử lý");
                 shipping.setShippingMethod(shippingMethod);
                 // snapshot fee
                 shipping.setShippingFee(shippingMethod.getFee());
@@ -80,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
                 order.setUser(user);
                 order.setShipping(shipping);
                 order.setPayment(payment);
-                order.setStatus("PENDING");
+                order.setStatus("Đang xử lý");
                 BigDecimal subtotal = BigDecimal.ZERO;
                 BigDecimal shippingFee = shippingMethod.getFee();
                 int totalQuantity = 0;

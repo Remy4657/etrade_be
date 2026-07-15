@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class JwtUtil {
+public class JwtUtils {
     private final JwtConfig jwtConfig;
     private final String SECRET = "SECRET123456789123456789SECRET123456789123456789"; // nên dài >= 256 bit
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8)); // tạo key từ secret
