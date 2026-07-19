@@ -1,7 +1,7 @@
 package com.example.demo.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,15 +13,17 @@ import com.example.demo.dto.req.LoginRequest;
 import com.example.demo.dto.req.RegisterRequest;
 import com.example.demo.dto.res.AuthGoogleResponse;
 import com.example.demo.dto.res.AuthResponse;
+import com.example.demo.dto.res.SignupResponse;
+import com.example.demo.entity.user.RefreshTokenEntity;
 import com.example.demo.entity.user.RoleEntity;
-import com.example.demo.entity.user.TokenBlacklistEntity;
 import com.example.demo.entity.user.UserEntity;
-import com.example.demo.exception.CustomException;
+import com.example.demo.exception.AppExceptions.*;
+
+import com.example.demo.repository.RefreshTokenRepository;
 import com.example.demo.repository.RoleRepository;
-import com.example.demo.repository.TokenBlacklistRepository;
 import com.example.demo.repository.UserRepository;
 
-import com.example.demo.security.JwtUtil;
+import com.example.demo.security.JwtUtils;
 import com.example.demo.service.AuthService;
 
 import jakarta.servlet.http.Cookie;
@@ -37,18 +39,29 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
-    private final TokenBlacklistRepository tokenBlacklistRepository;
+    private final JwtUtils jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private void assignDefaultRole(UserEntity user) {
         RoleEntity userRole = roleRepository.findByName("user");
         user.getRoleList().add(userRole);
     }
 
+    // clear blacklist token
+    // @Override
+    // @Scheduled(cron = "0 0 * * * *") // mỗi phút
+    // @Transactional
+    // public void cleanExpiredTokens() {
+    // int count =
+    // tokenBlacklistRepository.deleteByExpiredAtBefore(LocalDateTime.now());
+    // System.out.println("Deleted expired tokens: " + count);
+    // }
+
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public SignupResponse register(RegisterRequest request) {
+
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new CustomException("Email already exists");
+            throw new ConflictRequestError("Email already exists");
         }
         UserEntity user = new UserEntity();
         user.setUsername(request.getUsername());
@@ -61,10 +74,8 @@ public class AuthServiceImpl implements AuthService {
                 .stream()
                 .map(RoleEntity::getName)
                 .toList();
-        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles);
 
-        return new AuthResponse(
-                token,
+        return new SignupResponse(
                 user.getUsername(),
                 user.getEmail(),
                 roles);
@@ -76,48 +87,79 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Wrong password");
+            throw new UnauthorizedError("Wrong password");
         }
         List<String> roles = user.getRoleList()
                 .stream()
                 .map(RoleEntity::getName)
                 .toList();
-        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles);
+
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getId(), user.getEmail(), roles);
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+
+        RefreshTokenEntity tokenEntity = RefreshTokenEntity.builder()
+                .token(refreshToken)
+                .expiredAt(LocalDateTime.now().plusDays(7))
+                .revoked(false)
+                .user(user)
+                .build();
+
+        refreshTokenRepository.save(tokenEntity);
+
         return new AuthResponse(
-                token,
+                accessToken,
+                refreshToken,
                 user.getUsername(),
                 user.getEmail(),
                 roles);
     }
 
     @Override
+    @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response) {
 
-        // 1. Lấy token từ cookie
-        String token = extractTokenFromCookie(request);
+        // 1. Lấy refresh token từ cookie
+        String refreshToken = extractTokenFromCookie(request, "refresh_token");
 
-        // 2. Revoke token (nếu tồn tại)
-        if (token != null && !tokenBlacklistRepository.existsByToken(token)) {
-            TokenBlacklistEntity blacklist = new TokenBlacklistEntity();
-            blacklist.setToken(token);
-            blacklist.setExpiredAt(jwtUtil.getExpiration(token));
-            tokenBlacklistRepository.save(blacklist);
-        }
-
-        // 3. Xóa cookie access_token
-        clearCookie(response, "access_token");
-    }
-
-    private String extractTokenFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null)
-            return null;
-
-        for (Cookie cookie : request.getCookies()) {
-            if ("access_token".equals(cookie.getName())) {
-                return cookie.getValue();
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            try {
+                // Xóa refresh token khỏi DB (nếu tồn tại)
+                int deletedCount = refreshTokenRepository.deleteByToken(refreshToken);
+                if (deletedCount > 0) {
+                    System.out.println("Refresh token deleted: {}" + refreshToken);
+                } else {
+                    System.out.println("Refresh token not found, might be already removed");
+                }
+            } catch (Exception e) {
+                System.out.println("Error deleting refresh token from DB: {}" + e.getMessage());
             }
         }
-        return null;
+
+        // 2. (Tùy chọn) Blacklist access token nếu bạn muốn ngăn dùng lại access token
+        // trước khi hết hạn
+        // String accessToken = extractTokenFromCookie(request, "access_token");
+        // if (accessToken != null &&
+        // !tokenBlacklistRepository.existsByToken(accessToken)) {
+        // TokenBlacklistEntity blacklist = new TokenBlacklistEntity();
+        // blacklist.setToken(accessToken);
+        // blacklist.setExpiredAt(jwtUtil.getExpirationDate(accessToken));
+        // tokenBlacklistRepository.save(blacklist);
+        // }
+
+        // 3. Xóa cookie access_token và refresh_token
+        clearCookie(response, "access_token");
+        clearCookie(response, "refresh_token");
+
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest request, String cookieName) {
+        if (request.getCookies() == null)
+            return null;
+        return Arrays.stream(request.getCookies())
+                .filter(c -> cookieName.equals(c.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
     }
 
     private void clearCookie(HttpServletResponse response, String name) {
@@ -130,25 +172,15 @@ public class AuthServiceImpl implements AuthService {
         response.addCookie(cookie);
     }
 
-    // clear blacklist token
-    @Override
-    @Scheduled(cron = "0 0 * * * *") // mỗi phút
-    @Transactional
-    public void cleanExpiredTokens() {
-        int count = tokenBlacklistRepository.deleteByExpiredAtBefore(LocalDateTime.now());
-        System.out.println("Deleted expired tokens: " + count);
-    }
-
     @Override
     @Transactional
     public AuthGoogleResponse loginWithGoogle(Jwt jwt) {
         try {
             String email = jwt.getClaim("email");
             String name = jwt.getClaim("name");
-            System.out.println("email: " + email);
-            System.out.println("name: " + name);
 
-            String googleSub = jwt.getSubject();
+            String googleSub = jwt.getSubject(); // sub là định danh duy nhất của user trên Google, có thể dùng để lưu
+                                                 // vào db nếu muốn
 
             UserEntity user = userRepository.findByEmail(email)
                     .orElseGet(() -> {
@@ -157,26 +189,78 @@ public class AuthServiceImpl implements AuthService {
                         newUser.setUsername(name);
                         newUser.setProvider("GOOGLE");
                         newUser.setProviderId(googleSub);
+
                         if (newUser.getRoleList().isEmpty()) {
                             assignDefaultRole(newUser);
                         }
                         return userRepository.save(newUser);
                     });
+
             List<String> roles = user.getRoleList()
                     .stream()
                     .map(RoleEntity::getName)
                     .toList();
+
+            String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getId(), user.getEmail(), roles);
+            String refreshToken = jwtUtil.generateRefreshToken(user);
+
+            RefreshTokenEntity tokenEntity = RefreshTokenEntity.builder()
+                    .token(refreshToken)
+                    .expiredAt(LocalDateTime.now().plusDays(7))
+                    .revoked(false)
+                    .user(user)
+                    .build();
+
+            refreshTokenRepository.save(tokenEntity);
+
             return AuthGoogleResponse.builder()
-                    .accessToken(jwtUtil.generateToken(user.getUsername(), user.getId(), user.getEmail(), roles))
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
                     .roles(roles)
                     .email(user.getEmail())
                     .username(user.getUsername())
                     .build();
+
         } catch (Exception e) {
             System.err.println("GOOGLE LOGIN ERROR");
             e.printStackTrace(); // CÁI QUAN TRỌNG NHẤT
             throw e; // bắt buộc throw lại để NextAuth biết là fail
         }
+    }
+
+    @Override
+    public String refreshToken(String refreshToken) {
+
+        if (refreshToken == null) {
+            throw new UnauthorizedError("Refresh token missing");
+        }
+        RefreshTokenEntity tokenEntity = refreshTokenRepository
+                .findByToken(refreshToken)
+                .orElseThrow(() -> new UnauthorizedError("Refresh token invalid"));
+
+        if (tokenEntity.isRevoked()) {
+            throw new UnauthorizedError("Refresh token revoked");
+        }
+
+        if (jwtUtil.isTokenExpired(refreshToken)) { // token hết hạn thì xóa luôn trong db
+            refreshTokenRepository.delete(tokenEntity);
+
+            throw new UnauthorizedError(
+                    "Refresh token expired");
+        }
+
+        UserEntity user = tokenEntity.getUser();
+
+        List<String> roles = user.getRoleList()
+                .stream()
+                .map(role -> role.getName())
+                .toList();
+
+        return jwtUtil.generateAccessToken(
+                user.getUsername(),
+                user.getId(),
+                user.getEmail(),
+                roles);
 
     }
 }

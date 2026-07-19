@@ -18,10 +18,6 @@ import lombok.RequiredArgsConstructor;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-    // @Override
-    // public ProductEntity createProduct(ProductEntity product) {
-    // return productRepository.createProduct(product);
-    // }
 
     @Override
     public List<ProductResponse> findAllProducts() {
@@ -60,7 +56,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponse> getNewestProducts() {
-        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(90);
         return productRepository
                 .findByCreatedAtAfterOrderByCreatedAtDesc(thirtyDaysAgo).stream()
                 .map(productMapper::toProductResponse)

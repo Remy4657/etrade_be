@@ -1,34 +1,32 @@
 package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.req.RegisterRequest;
+import com.example.demo.dto.res.BaseResponse;
 import com.example.demo.dto.res.ProductResponse;
-import com.example.demo.entity.product.ProductEntity;
-import com.example.demo.entity.user.UserEntity;
+import com.example.demo.dto.res.SignupResponse;
+import com.example.demo.entity.product.WishlistEntity;
+import com.example.demo.service.AuthService;
 import com.example.demo.service.ProductService;
-import com.example.demo.service.UserService;
+import com.example.demo.service.WishlistService;
+
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class ProductController {
-    @Autowired
-    private ProductService productService;
-    // @Autowired
-    // private UserService userService;
 
-    // @PostMapping("/product/add")
-    // public ProductEntity createProduct(ProductEntity productEntity) {
-    // return productService.createProduct(productEntity);
-    // }
+    private final ProductService productService;
 
     @GetMapping("/products")
     public List<ProductResponse> getAllProducts() {
@@ -60,4 +58,5 @@ public class ProductController {
         List<ProductResponse> products = productService.getBestSellerProducts();
         return ResponseEntity.ok(products);
     }
+
 }
