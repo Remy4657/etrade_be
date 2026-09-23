@@ -1,8 +1,12 @@
 services:
   mariadb:
     image: mariadb:10.6
-    container_name: mariadb
-
+    container_name: mariadb-container
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: e_trade
@@ -29,11 +33,14 @@ services:
       dockerfile: Dockerfile
     image: remy4657/etrade-backend:latest
     container_name: etrade_backend
-    environment:
-      SPRING_APPLICATION_NAME: shop
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/e_trade
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root # mat khau giong mat khau tren mysql
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    # environment:
+    #   SPRING_APPLICATION_NAME: shop
+    #   SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/e_trade
+    #   SPRING_DATASOURCE_USERNAME: root
+    #   SPRING_DATASOURCE_PASSWORD: root # mat khau giong mat khau tren mysql
     ports:
       - "8080:8080" # trên local sẽ truy cập backend qua cổng 8080, bên trong container sẽ chạy trên cổng 8080
     networks:
