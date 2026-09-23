@@ -1,34 +1,33 @@
 services:
-  mysql:
-    image: mysql:8
-    container_name: etrade_mysql
+  mariadb:
+    image: mariadb:10.6
+    container_name: etrade_mariadb
+
     environment:
-      MYSQL_ROOT_PASSWORD: root # len vps thay pass manh hon
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: e_trade
+    ports:
+      - "3306:3306"
     volumes:
-      - java_etrade_mysql_data:/var/lib/mysql
+      - db_data:/var/lib/mysql # bind mount để lưu dữ liệu bền vững ở thư mục host, khác với volume mặc định của Docker không nên truy cập trực tiếp từ host
     networks:
       - etrade-network
-
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: etrade_phpmyadmin
     ports:
-      - "8081:80" # trên local: 8081, bên trong container: 80, len vps: "127.0.0.1:8081:80"
+      - "8081:80"
     environment:
-      PMA_HOST: mysql # chay cung 1 cong nen chi can ghi ten ra la duoc
+      PMA_HOST: mariadb
       PMA_USER: root
       PMA_PASSWORD: root
-    networks:
-      - etrade-network
     depends_on:
-      - mysql
-
+      - mariadb
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    image: remy4657/test-etrade-be-ci:latest
+    image: remy4657/etrade-backend:latest
     container_name: etrade_backend
     environment:
       SPRING_APPLICATION_NAME: shop
@@ -43,4 +42,4 @@ networks:
   etrade-network:
     external: true
 volumes:
-  java_etrade_mysql_data:
+  db_data:
