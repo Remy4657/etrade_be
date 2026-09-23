@@ -2,15 +2,9 @@ services:
   mysql:
     image: mysql:8
     container_name: etrade_mysql
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root # len vps thay pass manh hon
       MYSQL_DATABASE: e_trade
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
     volumes:
       - java_etrade_mysql_data:/var/lib/mysql
     networks:
@@ -20,9 +14,9 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: etrade_phpmyadmin
     ports:
-      - "8081:80" # trên local sẽ truy cập phpMyAdmin qua cổng 8081, bên trong container sẽ chạy trên cổng 80
+      - "8081:80" # trên local: 8081, bên trong container: 80, len vps: "127.0.0.1:8081:80"
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: mysql # chay cung 1 cong nen chi can ghi ten ra la duoc
       PMA_USER: root
       PMA_PASSWORD: root
     networks:
@@ -31,19 +25,16 @@ services:
       - mysql
 
   backend:
-    build: #  len vps thi bo di
+    build:
       context: .
       dockerfile: Dockerfile
     image: remy4657/test-etrade-be-ci:latest
-    container_name: shop_backend
-    depends_on:
-      mysql:
-        condition: service_healthy
+    container_name: etrade_backend
     environment:
       SPRING_APPLICATION_NAME: shop
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/e_trade
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_PASSWORD: root # mat khau giong mat khau tren mysql
     ports:
       - "8080:8080" # trên local sẽ truy cập backend qua cổng 8080, bên trong container sẽ chạy trên cổng 8080
     networks:
