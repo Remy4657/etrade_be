@@ -1,7 +1,7 @@
 services:
   mariadb:
     image: mariadb:10.6
-    container_name: etrade_mariadb
+    container_name: mariadb
 
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -31,7 +31,7 @@ services:
     container_name: etrade_backend
     environment:
       SPRING_APPLICATION_NAME: shop
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/e_trade
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/e_trade
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root # mat khau giong mat khau tren mysql
     ports:
