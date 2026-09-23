@@ -21,7 +21,7 @@ ENV JAVA_HOME=/opt/jdk
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Sao chép file JAR vào container
-COPY target/demo-0.0.1-SNAPSHOT.jar app.jar
+COPY target/etrade_backend-0.0.1-SNAPSHOT.jar app.jar
 
 # Thiết lập entrypoint để chạy ứng dụng Java
 ENTRYPOINT ["java", "-jar", "/app.jar"]
