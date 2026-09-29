@@ -48,7 +48,7 @@ public class OrderEntity extends BaseEntity {
     @JoinColumn(name = "shipping_id", nullable = false, unique = false)
     private ShippingEntity shipping;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", nullable = false, unique = false)
     private PaymentEntity payment;
 }

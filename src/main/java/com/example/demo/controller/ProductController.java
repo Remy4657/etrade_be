@@ -1,17 +1,10 @@
 package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.req.RegisterRequest;
-import com.example.demo.dto.res.BaseResponse;
 import com.example.demo.dto.res.ProductResponse;
-import com.example.demo.dto.res.SignupResponse;
-import com.example.demo.entity.product.WishlistEntity;
-import com.example.demo.service.AuthService;
 import com.example.demo.service.ProductService;
-import com.example.demo.service.WishlistService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -56,7 +56,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponse> getNewestProducts() {
-        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(90);
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(1000);
         return productRepository
                 .findByCreatedAtAfterOrderByCreatedAtDesc(thirtyDaysAgo).stream()
                 .map(productMapper::toProductResponse)
