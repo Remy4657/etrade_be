@@ -13,7 +13,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql # bind mount để lưu dữ liệu bền vững ở thư mục host, khác với volume mặc định của Docker không nên truy cập trực tiếp từ host
+      - db_data:/var/lib/mysql # Docker named volume, lưu dữ liệu MariaDB bền vững
     networks:
       - etrade-network
   phpmyadmin:
@@ -25,6 +25,8 @@ services:
       PMA_HOST: mariadb
       PMA_USER: root
       PMA_PASSWORD: root
+    networks:
+      - etrade-network
     depends_on:
       - mariadb
   backend:
@@ -50,3 +52,5 @@ networks:
     external: true
 volumes:
   db_data:
+    external: true # nghĩa là nói rằng volume db_data đã tồn tại rồi, dùng chính nó và không tạo mới nữa
+    name: docker_db_data # ép etrade_be_db_data (là volume của container đang dùng) trỏ tới volume db_data

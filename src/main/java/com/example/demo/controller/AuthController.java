@@ -1,7 +1,5 @@
 package com.example.demo.controller;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo.config.JwtConfig;
 import com.example.demo.dto.req.LoginRequest;
@@ -21,6 +18,7 @@ import com.example.demo.dto.res.AuthGoogleResponse;
 import com.example.demo.dto.res.AuthResponse;
 import com.example.demo.dto.res.BaseResponse;
 import com.example.demo.dto.res.SignupResponse;
+import com.example.demo.dto.res.UserResponse;
 import com.example.demo.entity.user.UserEntity;
 import com.example.demo.exception.AppExceptions.UnauthorizedError;
 import com.example.demo.repository.UserRepository;
@@ -72,12 +70,15 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public UserEntity me(Authentication authentication) {
+    public UserResponse me(Authentication authentication) {
 
         Long userId = Long.parseLong(authentication.getName());
-        return userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedError("user not found"));
 
+        return new UserResponse(
+                user.getUsername(),
+                user.getEmail());
     }
 
     @PostMapping("/logout")

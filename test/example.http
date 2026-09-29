@@ -1,0 +1,8 @@
+
+### newest
+GET http://localhost:8080/api/v1/products/newest HTTP/1.1
+content-type: application/json
+
+### bestseller
+GET http://localhost:8080/api/v1/products/best-seller HTTP/1.1
+content-type: application/json
